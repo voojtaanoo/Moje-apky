@@ -182,6 +182,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   .moreitem{background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;text-align:center;}
   .moreitem .mi-ic{font-size:22px;}
   .moreitem .mi-lbl{font-size:12px;font-weight:700;}
+
+  /* Live Trading wizard — force inline grids to stack sensibly */
+  #view-liveplan div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr !important;max-width:100% !important;}
+  #view-liveplan div[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr 1fr !important;max-width:100% !important;}
+  #view-liveplan div[style*="grid-template-columns:1fr 1fr"]:not([style*="1fr 1fr 1fr"]){grid-template-columns:1fr !important;}
+  #view-liveplan div[style*="align-items:flex-start;gap:20px"]{flex-direction:column;gap:12px !important;}
+  #view-liveplan svg{max-width:280px;margin:0 auto;}
+  #dc-multi{grid-column:1/-1 !important;}
+  #lp-s1 > div[style*="grid"], #lp-s2 > div[style*="grid"], #lp-s3 > div[style*="grid"]{margin-left:0 !important;margin-right:0 !important;}
+  .fgrid > .fg.full div[style*="grid-template-columns"]{grid-template-columns:1fr !important;}
+  #view-liveplan div[style*="top:18px;left:10%"],#view-liveplan div[id^="prog-line"]{left:6%;right:6%;}
+  #view-liveplan div[style*="font-size:10px;color:var(--ac2);font-weight:600"],
+  #view-liveplan div[style*="font-size:10px;color:var(--tx3);font-weight:600"]{font-size:8.5px;}
+
+  /* generic: any stray 4/5-column inline grids elsewhere collapse to 2 */
+  div[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(2,1fr) !important;}
+  div[style*="grid-template-columns:repeat(5,1fr)"]{grid-template-columns:repeat(2,1fr) !important;}
+
+  .habits-grid,.moodrow{overflow-x:visible;}
+  .twrap{-webkit-overflow-scrolling:touch;}
+
+  /* Filter bars & section headers wrap cleanly */
+  .fsel{flex:1 1 45%;min-width:0;font-size:12px;padding:8px 10px;}
+  #view-trades > div[style*="justify-content:space-between"]{flex-direction:column;align-items:stretch !important;gap:10px;}
+  #view-calendar > div[style*="justify-content:space-between"]{flex-wrap:wrap;gap:10px;}
+  #view-playbook .page-header, .content > div[style*="justify-content:space-between"]{flex-wrap:wrap;gap:10px;}
 }
 @media (min-width: 861px){
   .mnav,.moresheet{display:none !important;}
