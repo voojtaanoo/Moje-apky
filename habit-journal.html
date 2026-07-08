@@ -263,6 +263,15 @@ canvas{max-height:200px;}
     <div class="mhdr"><span class="mtitle">⚙️ Nastavení & Data</span><button class="btn-icon" onclick="closeSettings()">✕</button></div>
     <div class="mbody">
       <div class="settingsblock">
+        <div class="t">✅ Sledované návyky</div>
+        <div id="habits-settings-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="new-habit-icon" placeholder="🎯" maxlength="4" style="width:52px;text-align:center;font-family:var(--fn);font-size:18px;font-weight:400;padding:9px 4px;">
+          <input type="text" id="new-habit-name" placeholder="Název návyku..." style="flex:1;font-family:var(--fn);font-size:13px;font-weight:500;">
+        </div>
+        <button class="btn-a" style="width:100%;margin-top:8px;" onclick="addHabit()">+ Přidat návyk</button>
+      </div>
+      <div class="settingsblock">
         <div class="t">📤 Export dat</div>
         <button class="btn-a" style="width:100%;" onclick="exportData()">Stáhnout zálohu (JSON)</button>
       </div>
@@ -280,13 +289,15 @@ canvas{max-height:200px;}
 </div>
 
 <script>
-const HABITS=[
+const DEFAULT_HABITS=[
   {id:'sleep',icon:'😴',name:'Spánek 7+ hod'},{id:'routine',icon:'🌅',name:'Ranní rutina'},
   {id:'trading',icon:'📈',name:'Trading'},{id:'sport',icon:'💪',name:'Sport'},
   {id:'pushups',icon:'🏋️',name:'Kliky'},{id:'kcal',icon:'🥗',name:'Splnění KCal'},
   {id:'creatin',icon:'💊',name:'Kreatin'},{id:'journal',icon:'✍️',name:'Denní journaling'},
   {id:'noporn',icon:'🧠',name:'No porn'},
 ];
+let HABITS=JSON.parse(localStorage.getItem('hl_habits')||'null')||DEFAULT_HABITS;
+function saveHabits(){localStorage.setItem('hl_habits',JSON.stringify(HABITS));}
 const MOODS=[{v:1,e:'😞'},{v:3,e:'😕'},{v:5,e:'😐'},{v:7,e:'🙂'},{v:9,e:'😄'}];
 const FEELINGS=['💪 Silný','😌 Klidný','😤 Frustrovaný','😴 Unavený','🔥 Motivovaný','😰 Ve stresu','🎯 Fokusovaný','🌊 Rozhozený'];
 
@@ -468,10 +479,38 @@ function renderDiary(){
   }).join('');
 }
 
-function openSettings(){document.getElementById('settingsModal').classList.add('open');}
+function openSettings(){renderHabitsSettings();document.getElementById('settingsModal').classList.add('open');}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
-function exportData(){const blob=new Blob([JSON.stringify({entries,diaryEntries,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habitlog-backup-'+todayStr()+'.json';a.click();}
-function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);if(!confirm('Opravdu nahradit stávající data?'))return;entries=data.entries||[];diaryEntries=data.diaryEntries||[];save();saveDiaryStorage();calcStreak();buildCheckin();closeSettings();alert('Importováno! ('+entries.length+' záznamů)');}catch(err){alert('Chyba importu');}};reader.readAsText(file);}
+function renderHabitsSettings(){
+  const el=document.getElementById('habits-settings-list'); if(!el) return;
+  el.innerHTML = HABITS.map((h,i)=>`
+    <div style="display:flex;align-items:center;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;">
+      <span style="font-size:17px;">${h.icon}</span>
+      <span style="flex:1;font-size:13px;font-weight:600;">${h.name}</span>
+      <button class="btn-icon" onclick="deleteHabit(${i})">🗑</button>
+    </div>`).join('') || '<div style="color:var(--tx3);font-size:12px;padding:6px 2px;">Žádné návyky — přidej první níže.</div>';
+}
+function addHabit(){
+  const icon=document.getElementById('new-habit-icon').value.trim()||'⭐';
+  const name=document.getElementById('new-habit-name').value.trim();
+  if(!name){alert('Zadej název návyku');return;}
+  const id='h'+Date.now();
+  HABITS.push({id,icon,name});
+  saveHabits();
+  document.getElementById('new-habit-icon').value='';
+  document.getElementById('new-habit-name').value='';
+  renderHabitsSettings();
+  buildCheckin();
+}
+function deleteHabit(i){
+  if(!confirm('Smazat návyk "'+HABITS[i].name+'"? Historická data u minulých dní zůstanou, jen se přestane počítat do skóre.'))return;
+  HABITS.splice(i,1);
+  saveHabits();
+  renderHabitsSettings();
+  buildCheckin();
+}
+function exportData(){const blob=new Blob([JSON.stringify({entries,diaryEntries,habits:HABITS,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habitlog-backup-'+todayStr()+'.json';a.click();}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);if(!confirm('Opravdu nahradit stávající data?'))return;entries=data.entries||[];diaryEntries=data.diaryEntries||[];if(data.habits&&data.habits.length){HABITS=data.habits;saveHabits();}save();saveDiaryStorage();calcStreak();buildCheckin();renderHabitsSettings();closeSettings();alert('Importováno! ('+entries.length+' záznamů)');}catch(err){alert('Chyba importu');}};reader.readAsText(file);}
 function deleteAll(){if(!confirm('Opravdu smazat VŠECHNA data?'))return;entries=[];diaryEntries=[];save();saveDiaryStorage();calcStreak();buildCheckin();closeSettings();}
 
 calcStreak();
