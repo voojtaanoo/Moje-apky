@@ -144,33 +144,47 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 
 /* ===== MOBILE / PWA LAYOUT ===== */
 @media (max-width: 860px){
-  body{padding-bottom:env(safe-area-inset-bottom);}
-  .sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;min-width:0;height:60px;flex-direction:row;border-right:none;border-top:1px solid var(--bd);z-index:50;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,.06);}
-  .slogo,.sbot,.nsec{display:none;}
-  .snav{flex-direction:row;padding:0;gap:0;overflow-x:auto;overflow-y:hidden;width:100%;-webkit-overflow-scrolling:touch;}
-  .tab{flex:1 0 auto;min-width:58px;flex-direction:column;gap:2px;font-size:9px;padding:8px 4px 6px;border-left:none;border-top:2px solid transparent;text-align:center;align-items:center;white-space:nowrap;border-radius:0;}
-  .tab .ic{font-size:16px;width:auto;}
-  .tab.active{background:transparent;border-top-color:var(--ac);}
-  .main{margin-left:0;padding-bottom:70px;}
-  .topbar{padding:0 12px;height:50px;position:sticky;}
-  .ttitle{font-size:14px;}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+  .sidebar{display:none;}
+  .main{margin-left:0;padding-bottom:6px;}
+  .topbar{padding:0 14px;height:52px;position:sticky;}
+  .ttitle{font-size:15px;}
   .tdate{display:none;}
   .topr{gap:6px;}
-  .btnp{padding:8px 12px;font-size:12px;}
+  .btnp{padding:9px 14px;font-size:12.5px;border-radius:11px;}
   #sum-print-btn,#liveplan-btn{display:none !important;}
-  .content{padding:12px;}
-  .mgrid{grid-template-columns:repeat(2,1fr) !important;gap:8px;}
+  .content{padding:14px;}
+  .mgrid{grid-template-columns:repeat(2,1fr) !important;gap:9px;}
   .g2,.g3{grid-template-columns:1fr !important;}
-  .mc{padding:10px 12px;}
-  .mcv{font-size:17px;}
+  .mc{padding:12px 14px;border-radius:14px;}
+  .mcv{font-size:18px;}
+  .card,.twrap{border-radius:16px;}
   .mov{align-items:flex-end;padding-top:0;}
-  .modal{width:100% !important;max-width:100%;max-height:92vh;border-radius:14px 14px 0 0;}
+  .modal{width:100% !important;max-width:100%;max-height:92vh;border-radius:18px 18px 0 0;}
   .fgrid{grid-template-columns:1fr !important;}
   table{font-size:11px;}
   th,td{padding:8px 6px;}
   .twrap{overflow-x:auto;}
   .calg{gap:3px;}
   .cd{font-size:8px;}
+
+  /* Fixed bottom app nav */
+  .mnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bd);z-index:60;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.06);}
+  .mnavbtn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;color:var(--tx3);font-family:var(--fn);font-size:9.5px;font-weight:700;cursor:pointer;}
+  .mnavbtn .ni{font-size:19px;}
+  .mnavbtn.active{color:var(--ac);}
+  .moresheet{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(5px);z-index:70;display:none;align-items:flex-end;justify-content:center;}
+  .moresheet.open{display:flex;}
+  .morepanel{background:var(--sf);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:10px 10px calc(16px + env(safe-area-inset-bottom));max-height:75vh;overflow-y:auto;}
+  .morehdr{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 14px;}
+  .moretitle{font-size:15px;font-weight:800;}
+  .moregrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 6px;}
+  .moreitem{background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;text-align:center;}
+  .moreitem .mi-ic{font-size:22px;}
+  .moreitem .mi-lbl{font-size:12px;font-weight:700;}
+}
+@media (min-width: 861px){
+  .mnav,.moresheet{display:none !important;}
 }
 @media (min-width:861px){
   .mobile-only{display:none !important;}
@@ -214,6 +228,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <button class="setbtn" onclick="openSettings()">⚙️ Nastaveni a Data</button>
   </div>
 </aside>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mnav">
+  <button class="mnavbtn tab active" onclick="sv('dashboard',this)"><span class="ni">⬡</span>Dashboard</button>
+  <button class="mnavbtn tab" onclick="sv('trades',this)"><span class="ni">📋</span>Obchody</button>
+  <button class="mnavbtn tab" onclick="sv('liveplan',this)"><span class="ni">🟢</span>Live</button>
+  <button class="mnavbtn tab" onclick="sv('stats',this)"><span class="ni">🔬</span>Stats</button>
+  <button class="mnavbtn" onclick="openMore()"><span class="ni">☰</span>Více</button>
+</nav>
+
+<!-- MOBILE "VÍCE" SHEET -->
+<div class="moresheet" id="moreSheet" onclick="if(event.target===this)closeMore()">
+  <div class="morepanel">
+    <div class="morehdr"><span class="moretitle">Další sekce</span><button class="xbtn" onclick="closeMore()">✕</button></div>
+    <div class="moregrid">
+      <div class="moreitem" onclick="sv('calendar', null);closeMore();"><span class="mi-ic">📅</span><span class="mi-lbl">Kalendář</span></div>
+      <div class="moreitem" onclick="sv('reports', null);closeMore();"><span class="mi-ic">📊</span><span class="mi-lbl">Reporty</span></div>
+      <div class="moreitem" onclick="sv('playbook', null);closeMore();"><span class="mi-ic">📖</span><span class="mi-lbl">Playbook</span></div>
+      <div class="moreitem" onclick="sv('psychology', null);closeMore();"><span class="mi-ic">🧠</span><span class="mi-lbl">Psychologie</span></div>
+      <div class="moreitem" onclick="sv('summary', null);closeMore();"><span class="mi-ic">📋</span><span class="mi-lbl">Shrnutí</span></div>
+      <div class="moreitem" onclick="sv('daylog', null);closeMore();"><span class="mi-ic">📝</span><span class="mi-lbl">Denní záznamy</span></div>
+      <div class="moreitem" onclick="sv('mistakes', null);closeMore();"><span class="mi-ic">⚠️</span><span class="mi-lbl">Chyby</span></div>
+      <div class="moreitem" onclick="openSettings();closeMore();"><span class="mi-ic">⚙️</span><span class="mi-lbl">Nastavení</span></div>
+    </div>
+  </div>
+</div>
 
 <main class="main">
   <div class="topbar">
@@ -845,6 +885,8 @@ var VTITLES = {
   daylog:"Denní záznamy", mistakes:"Chyby & Disciplína", liveplan:"Live Trading"
 };
 
+function openMore() { document.getElementById("moreSheet").classList.add("open"); }
+function closeMore() { document.getElementById("moreSheet").classList.remove("open"); }
 function sv(v, btn) {
   document.querySelectorAll(".view").forEach(function(e) { e.classList.remove("active"); });
   document.querySelectorAll(".tab").forEach(function(e) { e.classList.remove("active"); });
