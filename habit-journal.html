@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>HabitLog</title>
+<link rel="manifest" href="manifest-habit.json">
+<meta name="theme-color" content="#0b1410">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HabitLog">
+<link rel="apple-touch-icon" href="icon-habit-192.png">
+<link rel="icon" href="icon-habit-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b1410; --sf:#121d18; --sf2:#182620; --sf3:#20332a;
+  --bd:#20332a; --bd2:#2b4237;
+  --mint:#2dd4a7; --mint-dim:rgba(45,212,167,0.12); --coral:#ff8b6b; --coral-dim:rgba(255,139,107,0.12);
+  --gold:#ffcf6b; --sky:#6bc9ff; --lav:#c39bff;
+  --tx:#eafaf3; --tx2:#8fb3a4; --tx3:#4d6c5f;
+  --fn:'Plus Jakarta Sans',sans-serif; --mo:'DM Mono',monospace;
+  --r:16px; --r2:12px;
+}
+html.light{
+  --bg:#f4faf7; --sf:#ffffff; --sf2:#eaf6f0; --sf3:#dcf0e6;
+  --bd:#d7ece1; --bd2:#bfe0d1;
+  --mint:#0d9e78; --mint-dim:rgba(13,158,120,0.10); --coral:#e8663f; --coral-dim:rgba(232,102,63,0.10);
+  --tx:#0c1f17; --tx2:#42685a; --tx3:#8fada0;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh;font-size:14px;line-height:1.5;padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+.app{max-width:560px;margin:0 auto;padding:0 16px;}
+.top{position:sticky;top:0;background:var(--bg);z-index:30;padding:calc(14px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;justify-content:space-between;max-width:560px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;}
+.mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--mint),var(--sky));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.bname{font-size:16px;font-weight:800;line-height:1.1;}
+.bdate{font-size:11px;color:var(--tx3);font-family:var(--mo);text-transform:capitalize;}
+.topr{display:flex;align-items:center;gap:8px;}
+.streakpill{display:flex;align-items:center;gap:5px;background:var(--mint-dim);border:1px solid rgba(45,212,167,.3);color:var(--mint);font-family:var(--mo);font-size:13px;font-weight:700;padding:6px 11px;border-radius:20px;}
+.iconbtn{background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);width:34px;height:34px;border-radius:10px;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+.view{display:none;padding-top:4px;}
+.view.active{display:block;}
+
+/* ===== DNES / CHECK-IN ===== */
+.hero{background:linear-gradient(145deg,var(--sf),var(--sf2));border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:14px;}
+.hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.hero-score{font-size:34px;font-weight:800;font-family:var(--mo);}
+.hero-score span{font-size:15px;color:var(--tx3);font-weight:500;}
+.hero-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-family:var(--mo);}
+.hero-bar{height:8px;background:var(--sf3);border-radius:4px;overflow:hidden;margin-top:10px;}
+.hero-fill{height:100%;background:linear-gradient(90deg,var(--mint),var(--sky));border-radius:4px;transition:width .4s;}
+
+.sec-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);font-family:var(--mo);margin:18px 2px 10px;display:flex;align-items:center;gap:6px;}
+
+.habits{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.hcard{background:var(--sf);border:2px solid var(--bd);border-radius:var(--r2);padding:13px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;user-select:none;}
+.hcard.on{background:var(--mint-dim);border-color:var(--mint);}
+.hcard .hi{font-size:19px;flex-shrink:0;}
+.hcard .hn{font-size:12.5px;font-weight:600;line-height:1.25;}
+.hcard .hc{margin-left:auto;width:20px;height:20px;border-radius:6px;border:2px solid var(--bd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;}
+.hcard.on .hc{background:var(--mint);border-color:var(--mint);color:#06251c;}
+
+.moodrow{display:flex;justify-content:space-between;gap:6px;}
+.moodbtn{flex:1;background:var(--sf);border:2px solid var(--bd);border-radius:12px;padding:11px 2px;text-align:center;cursor:pointer;font-size:22px;transition:all .15s;}
+.moodbtn.on{border-color:var(--gold);background:rgba(255,207,107,.12);transform:scale(1.06);}
+
+.feelrow{display:flex;flex-wrap:wrap;gap:7px;}
+.feelchip{background:var(--sf);border:1.5px solid var(--bd);color:var(--tx2);font-size:12px;font-weight:600;padding:8px 13px;border-radius:20px;cursor:pointer;transition:all .15s;}
+.feelchip.on{background:var(--lav);border-color:var(--lav);color:#1c1030;}
+
+.winbox,.strbox{border-radius:var(--r2);padding:14px;margin-bottom:10px;}
+.winbox{background:var(--mint-dim);border:1px solid rgba(45,212,167,.35);}
+.strbox{background:var(--coral-dim);border:1px solid rgba(255,139,107,.35);}
+.boxlbl{font-size:11.5px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.winbox .boxlbl{color:var(--mint);}
+.strbox .boxlbl{color:var(--coral);}
+textarea{background:var(--sf);border:1px solid var(--bd);color:var(--tx);font-family:var(--fn);font-size:13.5px;padding:11px 13px;border-radius:10px;outline:none;width:100%;resize:none;line-height:1.55;transition:border-color .2s;}
+textarea:focus{border-color:var(--mint);}
+input[type=number],input[type=date],input[type=text]{background:var(--sf);border:1px solid var(--bd);color:var(--tx);font-family:var(--mo);font-size:14px;font-weight:700;padding:10px 13px;border-radius:10px;outline:none;width:100%;}
+input:focus{border-color:var(--mint);}
+input[type=range]{-webkit-appearance:none;height:5px;background:var(--bd2);border-radius:3px;width:100%;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--mint);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+
+.extras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;}
+.exfield{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 13px;}
+.exlbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);font-family:var(--mo);margin-bottom:7px;display:flex;justify-content:space-between;}
+.exlbl b{color:var(--mint);font-size:13px;}
+
+.savebar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom) + 10px);margin-top:16px;}
+.btn-save{width:100%;background:linear-gradient(135deg,var(--mint),var(--sky));color:#06251c;border:none;font-family:var(--fn);font-size:15px;font-weight:800;padding:15px;border-radius:14px;cursor:pointer;box-shadow:0 6px 18px rgba(45,212,167,.28);}
+.btn-save:active{transform:scale(.98);}
+
+/* ===== FEED / HISTORIE ===== */
+.feedcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px 16px;margin-bottom:11px;}
+.feedtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.feeddate{font-family:var(--mo);font-size:12.5px;font-weight:700;color:var(--mint);}
+.feedscore{font-family:var(--mo);font-size:12px;color:var(--tx3);}
+.feedmood{font-size:18px;}
+.feeddots{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.feedwin,.feedstr{font-size:12.5px;line-height:1.5;margin-top:6px;padding-left:18px;position:relative;}
+.feedwin::before{content:"✓";position:absolute;left:0;color:var(--mint);font-weight:800;}
+.feedstr::before{content:"×";position:absolute;left:0;color:var(--coral);font-weight:800;}
+.feeddel{position:absolute;top:14px;right:14px;}
+
+/* ===== TRENDY ===== */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.stat-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 10px;text-align:center;}
+.stat-v{font-size:19px;font-weight:800;font-family:var(--mo);}
+.stat-l{font-size:9px;color:var(--tx3);font-family:var(--mo);text-transform:uppercase;margin-top:3px;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.ctitle{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-weight:700;margin-bottom:12px;font-family:var(--mo);}
+canvas{max-height:200px;}
+.heatmap-wrap{display:flex;gap:3px;flex-wrap:wrap;}
+.hm-cell{width:12px;height:12px;border-radius:3px;background:var(--sf3);}
+.hm-cell[data-v="1"]{background:rgba(45,212,167,.22);} .hm-cell[data-v="2"]{background:rgba(45,212,167,.45);}
+.hm-cell[data-v="3"]{background:rgba(45,212,167,.68);} .hm-cell[data-v="4"]{background:rgba(45,212,167,.92);}
+
+/* ===== DENÍK ===== */
+.diarycard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:11px;}
+.dtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ddate{font-family:var(--mo);font-size:12.5px;color:var(--mint);font-weight:700;}
+.dtext{font-size:13.5px;line-height:1.7;}
+
+.empty{text-align:center;padding:50px 16px;color:var(--tx3);}
+.empty .ei{font-size:36px;margin-bottom:10px;opacity:.3;}
+
+/* ===== BOTTOM NAV ===== */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bd);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom);}
+.navbtn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;color:var(--tx3);font-family:var(--fn);font-size:9.5px;font-weight:700;cursor:pointer;}
+.navbtn .ni{font-size:19px;}
+.navbtn.active{color:var(--mint);}
+
+/* ===== MODAL ===== */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:100;display:none;align-items:flex-end;justify-content:center;}
+.mov.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--sf);}
+.mtitle{font-size:15px;font-weight:800;}
+.mbody{padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.mfoot{display:flex;gap:10px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);}
+.btn-a{flex:1;background:linear-gradient(135deg,var(--mint),var(--sky));color:#06251c;border:none;font-family:var(--fn);font-size:14px;font-weight:800;padding:13px;border-radius:12px;cursor:pointer;}
+.btn-b{flex:1;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn);font-size:14px;font-weight:700;padding:13px;border-radius:12px;cursor:pointer;}
+.settingsblock{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;}
+.settingsblock .t{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-family:var(--mo);margin-bottom:9px;}
+.btn-icon{background:transparent;border:1px solid var(--bd);color:var(--tx3);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:12px;}
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">
+    <div class="mark">🌱</div>
+    <div><div class="bname">Habit<span style="color:var(--mint);">Log</span></div><div class="bdate" id="topdate"></div></div>
+  </div>
+  <div class="topr">
+    <div class="streakpill">🔥 <span id="streakval">0</span></div>
+    <button class="iconbtn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="iconbtn" onclick="openSettings()">⚙️</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- DNES -->
+  <div id="view-today" class="view active">
+    <div class="hero">
+      <div class="hero-top">
+        <div><div class="hero-lbl">Dnešní skóre</div><div class="hero-score" id="hero-score">0<span>/9</span></div></div>
+        <div style="font-size:30px;" id="hero-emoji">😐</div>
+      </div>
+      <div class="hero-bar"><div class="hero-fill" id="hero-fill" style="width:0%;"></div></div>
+    </div>
+
+    <div class="sec-lbl">✅ Návyky dneška</div>
+    <div class="habits" id="habits-grid"></div>
+
+    <div class="sec-lbl">🙂 Jak se dnes cítíš</div>
+    <div class="moodrow" id="mood-row"></div>
+
+    <div class="sec-lbl">💭 Pocit dne</div>
+    <div class="feelrow" id="feel-row"></div>
+
+    <div class="sec-lbl">📝 Denní bilance</div>
+    <div class="winbox">
+      <div class="boxlbl">✓ Co se dnes povedlo</div>
+      <textarea id="ci-wins" rows="2" placeholder="Co dnes byl úspěch, i malý..."></textarea>
+    </div>
+    <div class="strbox">
+      <div class="boxlbl">× Co dnes nešlo</div>
+      <textarea id="ci-struggles" rows="2" placeholder="Co bylo těžké, kde jsi klopýtl..."></textarea>
+    </div>
+
+    <div class="sec-lbl">📊 Doplňkové údaje</div>
+    <div class="extras">
+      <div class="exfield"><div class="exlbl">Spánek <b id="sv-sleep">5</b>/10</div><input type="range" id="ci-sleep" min="1" max="10" value="5" oninput="document.getElementById('sv-sleep').textContent=this.value"></div>
+      <div class="exfield"><div class="exlbl">Váha (kg)</div><input type="number" id="ci-weight" placeholder="—" step="0.1"></div>
+      <div class="exfield"><div class="exlbl">Trading P&L ($)</div><input type="number" id="ci-pnl" placeholder="—" step="1"></div>
+      <div class="exfield"><div class="exlbl">Datum</div><input type="date" id="ci-date"></div>
+    </div>
+
+    <div class="savebar"><button class="btn-save" onclick="saveCheckin()" id="savebtn">💾 Uložit dnešní den</button></div>
+  </div>
+
+  <!-- HISTORIE -->
+  <div id="view-history" class="view">
+    <div class="sec-lbl" style="margin-top:6px;">📅 Poslední záznamy</div>
+    <div id="history-list"></div>
+    <div id="history-empty" class="empty" style="display:none;"><div class="ei">📭</div><p>Zatím žádné záznamy</p></div>
+  </div>
+
+  <!-- TRENDY -->
+  <div id="view-trends" class="view">
+    <div class="stats-row" id="trend-stats"></div>
+    <div class="card"><div class="ctitle">90 dní přehled</div><div class="heatmap-wrap" id="heatmap"></div></div>
+    <div class="card"><div class="ctitle">Skóre návyků (%)</div><canvas id="scoreChart"></canvas></div>
+    <div class="card"><div class="ctitle">Nálada</div><canvas id="moodChart"></canvas></div>
+    <div class="card"><div class="ctitle">Plnění návyků</div><canvas id="pieChart"></canvas></div>
+    <div class="card"><div class="ctitle">Spánek</div><canvas id="sleepChart"></canvas></div>
+    <div class="card" id="weightCardWrap" style="display:none;"><div class="ctitle">Váha</div><canvas id="weightChart"></canvas></div>
+    <div class="card" id="pnlCardWrap" style="display:none;"><div class="ctitle">Trading P&L (kumulativně)</div><canvas id="pnlChart"></canvas></div>
+  </div>
+
+  <!-- DENÍK -->
+  <div id="view-diary" class="view">
+    <div class="sec-lbl" style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;">
+      <span>💬 Volné zápisky</span>
+      <button class="iconbtn" style="width:auto;padding:0 12px;font-size:12px;font-weight:700;color:var(--mint);" onclick="openDiaryModal()">+ Nový</button>
+    </div>
+    <div id="diary-list"></div>
+    <div id="diary-empty" class="empty" style="display:none;"><div class="ei">💬</div><p>Zatím žádné delší zápisky</p></div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button class="navbtn active" onclick="switchView('today',this)"><span class="ni">☀️</span>Dnes</button>
+  <button class="navbtn" onclick="switchView('history',this)"><span class="ni">📅</span>Historie</button>
+  <button class="navbtn" onclick="switchView('trends',this)"><span class="ni">📈</span>Trendy</button>
+  <button class="navbtn" onclick="switchView('diary',this)"><span class="ni">💬</span>Deník</button>
+</div>
+
+<!-- DIARY MODAL -->
+<div class="mov" id="diaryModal">
+  <div class="modal">
+    <div class="mhdr"><span class="mtitle" id="diary-modal-title">Nový zápis</span><button class="btn-icon" onclick="closeDiaryModal()">✕</button></div>
+    <div class="mbody">
+      <input type="date" id="diary-date">
+      <textarea id="diary-text" rows="8" placeholder="Napiš své myšlenky..." style="min-height:180px;"></textarea>
+      <div class="exfield"><div class="exlbl">Nálada <b id="diary-mood-val">5</b>/10</div><input type="range" id="diary-mood" min="1" max="10" value="5" oninput="document.getElementById('diary-mood-val').textContent=this.value"></div>
+    </div>
+    <div class="mfoot"><button class="btn-b" onclick="closeDiaryModal()">Zrušit</button><button class="btn-a" onclick="saveDiaryEntry()">Uložit</button></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="mov" id="settingsModal">
+  <div class="modal">
+    <div class="mhdr"><span class="mtitle">⚙️ Nastavení & Data</span><button class="btn-icon" onclick="closeSettings()">✕</button></div>
+    <div class="mbody">
+      <div class="settingsblock">
+        <div class="t">📤 Export dat</div>
+        <button class="btn-a" style="width:100%;" onclick="exportData()">Stáhnout zálohu (JSON)</button>
+      </div>
+      <div class="settingsblock">
+        <div class="t">📥 Import dat</div>
+        <label class="btn-b" style="display:block;text-align:center;cursor:pointer;">Vybrat soubor<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+      </div>
+      <div class="settingsblock">
+        <div class="t">🗑 Smazat vše</div>
+        <button class="btn-b" style="width:100%;color:var(--coral);border-color:rgba(255,139,107,.4);" onclick="deleteAll()">Smazat všechna data</button>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn-b" style="width:100%;" onclick="closeSettings()">Zavřít</button></div>
+  </div>
+</div>
+
+<script>
+const HABITS=[
+  {id:'sleep',icon:'😴',name:'Spánek 7+ hod'},{id:'routine',icon:'🌅',name:'Ranní rutina'},
+  {id:'trading',icon:'📈',name:'Trading'},{id:'sport',icon:'💪',name:'Sport'},
+  {id:'pushups',icon:'🏋️',name:'Kliky'},{id:'kcal',icon:'🥗',name:'Splnění KCal'},
+  {id:'creatin',icon:'💊',name:'Kreatin'},{id:'journal',icon:'✍️',name:'Denní journaling'},
+  {id:'noporn',icon:'🧠',name:'No porn'},
+];
+const MOODS=[{v:1,e:'😞'},{v:3,e:'😕'},{v:5,e:'😐'},{v:7,e:'🙂'},{v:9,e:'😄'}];
+const FEELINGS=['💪 Silný','😌 Klidný','😤 Frustrovaný','😴 Unavený','🔥 Motivovaný','😰 Ve stresu','🎯 Fokusovaný','🌊 Rozhozený'];
+
+let entries=JSON.parse(localStorage.getItem('hl_entries')||'[]');
+let diaryEntries=JSON.parse(localStorage.getItem('hl_diary')||'[]');
+let todayChecked=new Set();
+let selMood=5, selFeel=null;
+let charts={};
+let editingDiaryId=null;
+
+function save(){localStorage.setItem('hl_entries',JSON.stringify(entries));}
+function saveDiaryStorage(){localStorage.setItem('hl_diary',JSON.stringify(diaryEntries));}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function fmtDate(d){if(!d)return'';const p=d.split('-');return`${p[2]}.${p[1]}.${p[0]}`;}
+function moodEmoji(m){if(m>=9)return'😄';if(m>=7)return'🙂';if(m>=5)return'😐';if(m>=3)return'😕';return'😞';}
+
+document.getElementById('topdate').textContent=new Date().toLocaleDateString('cs-CZ',{weekday:'short',day:'numeric',month:'long'});
+document.getElementById('ci-date').value=todayStr();
+
+function switchView(v,btn){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.navbtn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(v==='today')buildCheckin();
+  if(v==='history')renderHistory();
+  if(v==='trends')renderTrends();
+  if(v==='diary')renderDiary();
+}
+
+function toggleTheme(){const l=document.documentElement.classList.toggle('light');localStorage.setItem('hl_theme',l?'light':'dark');document.getElementById('themeBtn').textContent=l?'☀️':'🌙';}
+(function(){if(localStorage.getItem('hl_theme')==='light'){document.documentElement.classList.add('light');document.getElementById('themeBtn').textContent='☀️';}})();
+
+function calcStreak(){let s=0;const d=new Date();while(true){const ds=d.toISOString().slice(0,10);const e=entries.find(x=>x.date===ds);if(e&&e.score>0){s++;d.setDate(d.getDate()-1);}else break;}document.getElementById('streakval').textContent=s;return s;}
+
+function buildCheckin(){
+  const dateInput=document.getElementById('ci-date');
+  if(!dateInput.value)dateInput.value=todayStr();
+  const today=dateInput.value;
+  const existing=entries.find(e=>e.date===today);
+  todayChecked = existing ? new Set(existing.habits) : new Set();
+  selMood = existing ? (existing.mood||5) : 5;
+  selFeel = existing ? (existing.feeling||null) : null;
+  document.getElementById('habits-grid').innerHTML = HABITS.map(h=>`
+    <div class="hcard ${todayChecked.has(h.id)?'on':''}" onclick="toggleHabit('${h.id}',this)">
+      <span class="hi">${h.icon}</span><span class="hn">${h.name}</span><span class="hc">${todayChecked.has(h.id)?'✓':''}</span>
+    </div>`).join('');
+  document.getElementById('mood-row').innerHTML = MOODS.map(m=>`
+    <div class="moodbtn ${selMood===m.v?'on':''}" onclick="pickMood(${m.v},this)">${m.e}</div>`).join('');
+  document.getElementById('feel-row').innerHTML = FEELINGS.map(f=>`
+    <div class="feelchip ${selFeel===f?'on':''}" onclick="pickFeel('${f}',this)">${f}</div>`).join('');
+  document.getElementById('ci-wins').value = existing ? (existing.wins||'') : '';
+  document.getElementById('ci-struggles').value = existing ? (existing.struggles||'') : '';
+  document.getElementById('ci-weight').value = existing ? (existing.weight||'') : '';
+  document.getElementById('ci-sleep').value = existing ? (existing.sleep||5) : 5;
+  document.getElementById('sv-sleep').textContent = existing ? (existing.sleep||5) : 5;
+  document.getElementById('ci-pnl').value = existing && existing.pnl!==null && existing.pnl!==undefined ? existing.pnl : '';
+  updateHero();
+}
+function toggleHabit(id,el){
+  if(todayChecked.has(id)){todayChecked.delete(id);el.classList.remove('on');el.querySelector('.hc').textContent='';}
+  else{todayChecked.add(id);el.classList.add('on');el.querySelector('.hc').textContent='✓';}
+  updateHero();
+}
+function pickMood(v,el){selMood=v;document.querySelectorAll('.moodbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');updateHero();}
+function pickFeel(f,el){
+  if(selFeel===f){selFeel=null;el.classList.remove('on');}
+  else{selFeel=f;document.querySelectorAll('.feelchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+}
+function updateHero(){
+  document.getElementById('hero-score').innerHTML = todayChecked.size+'<span>/'+HABITS.length+'</span>';
+  document.getElementById('hero-fill').style.width = Math.round(todayChecked.size/HABITS.length*100)+'%';
+  document.getElementById('hero-emoji').textContent = moodEmoji(selMood);
+}
+
+function saveCheckin(){
+  const today=document.getElementById('ci-date').value||todayStr();
+  const entry={
+    date:today, habits:[...todayChecked], score:todayChecked.size,
+    mood:selMood, feeling:selFeel,
+    wins:document.getElementById('ci-wins').value,
+    struggles:document.getElementById('ci-struggles').value,
+    weight:parseFloat(document.getElementById('ci-weight').value)||null,
+    sleep:parseInt(document.getElementById('ci-sleep').value),
+    pnl:document.getElementById('ci-pnl').value!==''?parseFloat(document.getElementById('ci-pnl').value):null
+  };
+  const idx=entries.findIndex(e=>e.date===today);
+  if(idx>=0)entries[idx]=entry;else entries.push(entry);
+  entries.sort((a,b)=>a.date.localeCompare(b.date));
+  save();calcStreak();
+  const btn=document.getElementById('savebtn');btn.textContent='✅ Uloženo!';setTimeout(()=>btn.textContent='💾 Uložit dnešní den',1600);
+}
+
+function renderHistory(){
+  const list=document.getElementById('history-list'),empty=document.getElementById('history-empty');
+  const sorted=[...entries].reverse();
+  if(!sorted.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=sorted.map(e=>`
+    <div class="feedcard">
+      <button class="btn-icon feeddel" onclick="deleteEntry('${e.date}')">🗑</button>
+      <div class="feedtop">
+        <span class="feeddate">${fmtDate(e.date)}</span>
+        <span class="feedmood">${moodEmoji(e.mood)}</span>
+      </div>
+      <div class="feeddots">${HABITS.map(h=>`<span class="hdot" style="width:9px;height:9px;border-radius:2px;background:${e.habits.includes(h.id)?'var(--mint)':'var(--sf3)'};" title="${h.name}"></span>`).join('')}
+        <span class="feedscore" style="margin-left:6px;">${e.score}/${HABITS.length}${e.feeling?' · '+e.feeling:''}</span>
+      </div>
+      ${e.wins?`<div class="feedwin">${e.wins}</div>`:''}
+      ${e.struggles?`<div class="feedstr">${e.struggles}</div>`:''}
+    </div>`).join('');
+}
+function deleteEntry(date){if(!confirm('Smazat záznam?'))return;entries=entries.filter(e=>e.date!==date);save();renderHistory();calcStreak();}
+
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function axisOpts(extra={}){return{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#4d6c5f',font:{family:'DM Mono',size:9}},grid:{display:false}},y:{ticks:{color:'#4d6c5f',font:{family:'DM Mono',size:9}},grid:{color:'rgba(43,66,55,0.4)'}}},...extra};}
+
+function renderTrends(){
+  const sr=document.getElementById('trend-stats');
+  if(!entries.length){
+    sr.innerHTML='<div class="empty" style="grid-column:1/-1;"><div class="ei">📊</div><p>Přidej první check-in</p></div>';
+    ['scoreChart','pieChart','moodChart','sleepChart','weightChart','pnlChart'].forEach(dc);
+    document.getElementById('heatmap').innerHTML='';return;
+  }
+  const total=entries.length,avgScore=(entries.reduce((s,e)=>s+e.score,0)/total).toFixed(1),avgMood=(entries.reduce((s,e)=>s+(e.mood||0),0)/total).toFixed(1),perfect=entries.filter(e=>e.score===HABITS.length).length;
+  sr.innerHTML=`<div class="stat-card"><div class="stat-v" style="color:var(--sky);">${total}</div><div class="stat-l">Dní</div></div><div class="stat-card"><div class="stat-v" style="color:var(--mint);">${avgScore}</div><div class="stat-l">Ø Návyky</div></div><div class="stat-card"><div class="stat-v" style="color:var(--gold);">${avgMood}</div><div class="stat-l">Ø Nálada</div></div>`;
+  const sorted=[...entries].sort((a,b)=>a.date.localeCompare(b.date)),labels=sorted.map(e=>fmtDate(e.date));
+
+  dc('scoreChart');const ctx1=document.getElementById('scoreChart').getContext('2d');const g1=ctx1.createLinearGradient(0,0,0,180);g1.addColorStop(0,'rgba(45,212,167,0.28)');g1.addColorStop(1,'rgba(45,212,167,0)');
+  charts['scoreChart']=new Chart(ctx1,{type:'line',data:{labels,datasets:[{data:sorted.map(e=>Math.round(e.score/HABITS.length*100)),borderColor:'#2dd4a7',backgroundColor:g1,borderWidth:2,pointRadius:2,fill:true,tension:.35}]},options:axisOpts({scales:{x:axisOpts().scales.x,y:{min:0,max:100,ticks:{color:'#4d6c5f',font:{family:'DM Mono',size:9},callback:v=>v+'%'},grid:{color:'rgba(43,66,55,0.4)'}}}})});
+
+  dc('moodChart');charts['moodChart']=new Chart(document.getElementById('moodChart').getContext('2d'),{type:'line',data:{labels,datasets:[{data:sorted.map(e=>e.mood||0),borderColor:'#ffcf6b',backgroundColor:'rgba(255,207,107,0.12)',borderWidth:2,pointRadius:2,fill:true,tension:.35}]},options:axisOpts({scales:{x:axisOpts().scales.x,y:{min:0,max:10,ticks:{color:'#4d6c5f',font:{family:'DM Mono',size:9}},grid:{color:'rgba(43,66,55,0.4)'}}}})});
+
+  dc('pieChart');const hCounts=HABITS.map(h=>entries.filter(e=>e.habits.includes(h.id)).length);
+  charts['pieChart']=new Chart(document.getElementById('pieChart').getContext('2d'),{type:'doughnut',data:{labels:HABITS.map(h=>h.name),datasets:[{data:hCounts,backgroundColor:['#2dd4a7','#6bc9ff','#c39bff','#ffcf6b','#ff8b6b','#ff5c5c','#f472b6','#34d399','#a3e635'],borderWidth:0}]},options:{plugins:{legend:{display:true,position:'bottom',labels:{color:'#8fb3a4',font:{family:'DM Mono',size:9},boxWidth:9,padding:8}}},cutout:'60%'}});
+
+  dc('sleepChart');charts['sleepChart']=new Chart(document.getElementById('sleepChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{data:sorted.map(e=>e.sleep||0),backgroundColor:sorted.map(e=>(e.sleep||0)>=7?'rgba(107,201,255,0.75)':'rgba(255,139,107,0.6)'),borderRadius:4}]},options:axisOpts({scales:{x:axisOpts().scales.x,y:{min:0,max:10,ticks:{color:'#4d6c5f',font:{family:'DM Mono',size:9}},grid:{color:'rgba(43,66,55,0.4)'}}}})});
+
+  const wData=sorted.filter(e=>e.weight);
+  document.getElementById('weightCardWrap').style.display = wData.length ? 'block':'none';
+  if(wData.length){dc('weightChart');const ctxw=document.getElementById('weightChart').getContext('2d');const gw=ctxw.createLinearGradient(0,0,0,180);gw.addColorStop(0,'rgba(195,155,255,0.25)');gw.addColorStop(1,'rgba(195,155,255,0)');
+    charts['weightChart']=new Chart(ctxw,{type:'line',data:{labels:wData.map(e=>fmtDate(e.date)),datasets:[{data:wData.map(e=>e.weight),borderColor:'#c39bff',backgroundColor:gw,borderWidth:2,pointRadius:3,fill:true,tension:.3}]},options:axisOpts()});}
+
+  const pnlE=sorted.filter(e=>e.pnl!==null&&e.pnl!==undefined);
+  document.getElementById('pnlCardWrap').style.display = pnlE.length ? 'block':'none';
+  if(pnlE.length){let cum=0;const cumData=pnlE.map(e=>{cum+=e.pnl;return cum;});dc('pnlChart');const ctxp=document.getElementById('pnlChart').getContext('2d');const gp=ctxp.createLinearGradient(0,0,0,180);gp.addColorStop(0,'rgba(45,212,167,0.25)');gp.addColorStop(1,'rgba(45,212,167,0)');
+    charts['pnlChart']=new Chart(ctxp,{type:'line',data:{labels:pnlE.map(e=>fmtDate(e.date)),datasets:[{data:cumData,borderColor:'#2dd4a7',backgroundColor:gp,borderWidth:2,pointRadius:2,pointBackgroundColor:cumData.map(v=>v>=0?'#2dd4a7':'#ff5c5c'),fill:true,tension:.3}]},options:axisOpts()});}
+
+  const hm=document.getElementById('heatmap');hm.innerHTML='';
+  for(let i=89;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const e=entries.find(x=>x.date===ds);const v=e?Math.min(4,Math.ceil(e.score/HABITS.length*4)):0;const cell=document.createElement('div');cell.className='hm-cell';cell.dataset.v=v;cell.title=`${fmtDate(ds)}${e?' — '+e.score+'/'+HABITS.length:' — žádný záznam'}`;hm.appendChild(cell);}
+}
+
+function openDiaryModal(id=null){
+  editingDiaryId=id;
+  if(id){const e=diaryEntries.find(x=>x.id===id);document.getElementById('diary-modal-title').textContent='Upravit zápis';document.getElementById('diary-date').value=e.date;document.getElementById('diary-text').value=e.text;document.getElementById('diary-mood').value=e.mood||5;document.getElementById('diary-mood-val').textContent=e.mood||5;}
+  else{document.getElementById('diary-modal-title').textContent='Nový zápis';document.getElementById('diary-date').value=todayStr();document.getElementById('diary-text').value='';document.getElementById('diary-mood').value=5;document.getElementById('diary-mood-val').textContent=5;}
+  document.getElementById('diaryModal').classList.add('open');
+}
+function closeDiaryModal(){document.getElementById('diaryModal').classList.remove('open');}
+function saveDiaryEntry(){
+  const text=document.getElementById('diary-text').value.trim();if(!text){alert('Zápis nemůže být prázdný');return;}
+  const entry={id:editingDiaryId||Date.now().toString(),date:document.getElementById('diary-date').value||todayStr(),text,mood:parseInt(document.getElementById('diary-mood').value)};
+  if(editingDiaryId){const i=diaryEntries.findIndex(x=>x.id===editingDiaryId);diaryEntries[i]=entry;}else{diaryEntries.push(entry);}
+  diaryEntries.sort((a,b)=>b.date.localeCompare(a.date));saveDiaryStorage();closeDiaryModal();renderDiary();
+}
+function deleteDiaryEntry(id){if(!confirm('Smazat zápis?'))return;diaryEntries=diaryEntries.filter(x=>x.id!==id);saveDiaryStorage();renderDiary();}
+function renderDiary(){
+  const list=document.getElementById('diary-list'),empty=document.getElementById('diary-empty');
+  if(!diaryEntries.length){list.innerHTML='';empty.style.display='block';return;}empty.style.display='none';
+  list.innerHTML=diaryEntries.map(e=>{
+    const paragraphs=e.text.split('\n').filter(p=>p.trim()).map(p=>`<p style="margin-bottom:7px;">${p}</p>`).join('');
+    return`<div class="diarycard">
+      <div class="dtop">
+        <span class="ddate">${fmtDate(e.date)} · ${moodEmoji(e.mood)}</span>
+        <div style="display:flex;gap:6px;"><button class="btn-icon" onclick="openDiaryModal('${e.id}')">✏</button><button class="btn-icon" onclick="deleteDiaryEntry('${e.id}')">🗑</button></div>
+      </div>
+      <div class="dtext">${paragraphs}</div>
+    </div>`;
+  }).join('');
+}
+
+function openSettings(){document.getElementById('settingsModal').classList.add('open');}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+function exportData(){const blob=new Blob([JSON.stringify({entries,diaryEntries,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='habitlog-backup-'+todayStr()+'.json';a.click();}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);if(!confirm('Opravdu nahradit stávající data?'))return;entries=data.entries||[];diaryEntries=data.diaryEntries||[];save();saveDiaryStorage();calcStreak();buildCheckin();closeSettings();alert('Importováno! ('+entries.length+' záznamů)');}catch(err){alert('Chyba importu');}};reader.readAsText(file);}
+function deleteAll(){if(!confirm('Opravdu smazat VŠECHNA data?'))return;entries=[];diaryEntries=[];save();saveDiaryStorage();calcStreak();buildCheckin();closeSettings();}
+
+calcStreak();
+buildCheckin();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("sw-habit.js").catch(function(e){ console.log("SW registration failed", e); });
+  });
+}
+</script>
+</body>
+</html>

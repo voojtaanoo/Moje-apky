@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>TradeLog</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TradeLog">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f7f8fa;--sf:#ffffff;--sf2:#f1f3f6;--sf3:#e8eaed;
+  --bd:#e4e7ec;--bd2:#d0d5dd;
+  --ac:#0f172a;--ac2:#334155;--adim:rgba(15,23,42,0.06);--ag:rgba(15,23,42,0.12);
+  --gr:#059669;--gd:rgba(5,150,105,0.08);
+  --rd:#dc2626;--rdim:rgba(220,38,38,0.07);
+  --yw:#d97706;--ydim:rgba(217,119,6,0.08);
+  --bl:#2563eb;--pu:#7c3aed;--cy:#0891b2;
+  --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
+  --fn:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;
+  --sw:240px;--r:10px;--rs:7px;
+}
+html.dark{
+  --bg:#0d1117;--sf:#161b22;--sf2:#1c2128;--sf3:#252c36;
+  --bd:#30363d;--bd2:#3d444d;--ac:#e6edf3;--ac2:#8b949e;
+  --adim:rgba(230,237,243,0.06);--ag:rgba(230,237,243,0.12);
+  --gr:#3fb950;--gd:rgba(63,185,80,0.08);
+  --rd:#f85149;--rdim:rgba(248,81,73,0.08);
+  --yw:#d29922;--tx:#e6edf3;--tx2:#8b949e;--tx3:#484f58;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:var(--fn);min-height:100vh;font-size:14px;line-height:1.5;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sw);min-width:var(--sw);background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:1px 0 0 var(--bd);}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.slogo{padding:18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;}
+.smark{width:34px;height:34px;background:var(--ac);color:var(--sf);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sbrand{font-size:14px;font-weight:700;letter-spacing:-.3px;}.sbrand span{color:var(--tx3);font-weight:400;}
+.ssub{font-size:9px;color:var(--tx3);font-family:var(--mo);text-transform:uppercase;letter-spacing:.8px;}
+.snav{padding:10px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.nsec{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);font-family:var(--mo);padding:10px 10px 4px;}
+.tab{background:transparent;border:none;width:100%;color:var(--tx2);font-family:var(--fn);font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--rs);cursor:pointer;transition:all .15s;text-align:left;display:flex;align-items:center;gap:10px;border-left:2px solid transparent;}
+.tab .ic{font-size:14px;width:20px;text-align:center;}
+.tab.active{background:var(--sf2);color:var(--tx);border-left-color:var(--ac);font-weight:600;}
+.tab:hover:not(.active){color:var(--tx);background:var(--sf2);}
+.sbot{padding:12px;border-top:1px solid var(--bd);}
+.acsel{background:var(--sf2);border:1px solid var(--bd2);color:var(--ac2);font-family:var(--mo);font-size:12px;font-weight:700;padding:7px 10px;border-radius:var(--rs);outline:none;cursor:pointer;width:100%;margin-bottom:6px;}
+.setbtn{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--tx3);font-family:var(--fn);font-size:12px;cursor:pointer;padding:5px 4px;width:100%;}
+.setbtn:hover{color:var(--tx);}
+.topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.ttitle{font-size:15px;font-weight:700;}
+.topr{display:flex;align-items:center;gap:8px;}
+.tdate{font-size:11px;color:var(--tx3);font-family:var(--mo);}
+.btni{background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-size:13px;padding:6px 10px;border-radius:var(--rs);cursor:pointer;transition:all .15s;}
+.btni:hover{border-color:var(--ac);color:var(--ac2);}
+.btnp{background:var(--ac);color:var(--sf);border:none;font-family:var(--fn);font-size:13px;font-weight:600;padding:8px 16px;border-radius:var(--rs);cursor:pointer;transition:opacity .15s;}
+.btnp:hover{opacity:.85;}
+.btns{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx);font-family:var(--fn);font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--rs);cursor:pointer;transition:all .15s;}
+.btns:hover{border-color:var(--ac);color:var(--ac2);}
+.btnd{background:var(--rdim);border:1px solid rgba(239,68,68,.3);color:var(--rd);font-family:var(--fn);font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--rs);cursor:pointer;}
+.content{padding:22px;flex:1;}
+.view{display:none;}.view.active{display:block;}
+.mgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;}
+.mc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;}
+.mcg{position:absolute;top:0;left:0;right:0;height:1px;border-radius:var(--r) var(--r) 0 0;}
+.mcl{font-size:11px;color:var(--tx3);font-weight:500;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.mcv{font-size:22px;font-weight:800;font-family:var(--mo);line-height:1;}
+.mcs{font-size:11px;color:var(--tx3);font-family:var(--mo);margin-top:5px;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;}
+.ctitle{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-weight:600;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+canvas{max-height:220px;}
+.twrap{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.twrap table{font-size:12.5px;}
+.thdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd);}
+.ttl2{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);font-weight:600;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:600;color:var(--tx3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd);background:var(--sf2);text-transform:uppercase;letter-spacing:.5px;}
+td{padding:10px 14px;font-size:12px;border-bottom:1px solid rgba(30,45,69,.5);font-family:var(--mo);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--sf2);}
+tr:hover td:first-child{border-radius:4px 0 0 4px;}
+tr:hover td:last-child{border-radius:0 4px 4px 0;}
+.bdg{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.4px;font-family:var(--mo);}
+.blong{background:rgba(16,185,129,.15);color:var(--gr);}
+.bshort{background:rgba(239,68,68,.15);color:var(--rd);}
+.blon{background:rgba(245,158,11,.12);color:var(--yw);}
+.bny{background:rgba(59,130,246,.12);color:var(--bl);}
+.pos{color:var(--gr);font-weight:700;}.neg{color:var(--rd);font-weight:700;}.neu{color:var(--tx3);}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cdn{font-size:10px;text-align:center;color:var(--tx3);padding:4px 0;font-weight:600;}
+.cd{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:var(--mo);}
+.cd.empty{background:transparent;}.cd.notrade{background:var(--sf2);color:var(--tx3);}
+.cd.cwin{background:rgba(16,185,129,.2);color:var(--gr);border:1px solid rgba(16,185,129,.3);}
+.cd.closs{background:rgba(239,68,68,.2);color:var(--rd);border:1px solid rgba(239,68,68,.3);}
+.cd.cbe{background:rgba(245,158,11,.15);color:var(--yw);}
+.cd.today{box-shadow:0 0 0 2px var(--ac);}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{display:flex;flex-direction:column;gap:5px;}.fg.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;}
+input,select,textarea{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx);font-family:var(--mo);font-size:13px;padding:9px 12px;border-radius:var(--rs);outline:none;transition:border-color .2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);}
+select option{background:var(--sf2);}
+textarea{resize:vertical;min-height:70px;font-family:var(--fn);font-size:13px;}
+input[type=range]{-webkit-appearance:none;height:4px;background:var(--bd);border-radius:2px;padding:0;border:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--ac);cursor:pointer;}
+.slrow{display:flex;align-items:center;gap:10px;}
+.sllbl{flex:1;font-size:12px;color:var(--tx2);}
+.slval{font-family:var(--mo);font-size:13px;font-weight:700;color:var(--ac2);width:18px;text-align:right;}
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto;}
+.mov.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:12px;width:780px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.12);}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--sf);z-index:1;}
+.mtitle{font-size:15px;font-weight:700;}
+.mbody{padding:22px;}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--bd);}
+.xbtn{background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.xbtn:hover{color:var(--rd);border-color:var(--rd);}
+.empty{text-align:center;padding:50px 20px;color:var(--tx3);}
+.empty .eic{font-size:40px;margin-bottom:12px;opacity:.25;}
+.abtn{background:transparent;border:1px solid var(--bd);color:var(--tx3);width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:11px;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;}
+.abtn:hover{color:var(--ac2);border-color:var(--ac);}
+.abtn.del:hover{color:var(--rd);border-color:var(--rd);}
+.fsel{background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--mo);font-size:11px;padding:6px 10px;border-radius:var(--rs);outline:none;cursor:pointer;}
+.tbar{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 18px;margin-bottom:18px;position:relative;overflow:hidden;}
+.tbar::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ac),var(--pu));}
+.tbtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.tblbl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.tbtrack{height:8px;background:var(--sf3);border-radius:4px;overflow:hidden;}
+.tbfill{height:100%;background:var(--ac);border-radius:4px;transition:width .5s;}
+.pbcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:border-color .15s;}
+.pbcard:hover{border-color:var(--bd2);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+
+/* ===== MOBILE / PWA LAYOUT ===== */
+@media (max-width: 860px){
+  body{padding-bottom:env(safe-area-inset-bottom);}
+  .sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;min-width:0;height:60px;flex-direction:row;border-right:none;border-top:1px solid var(--bd);z-index:50;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,.06);}
+  .slogo,.sbot,.nsec{display:none;}
+  .snav{flex-direction:row;padding:0;gap:0;overflow-x:auto;overflow-y:hidden;width:100%;-webkit-overflow-scrolling:touch;}
+  .tab{flex:1 0 auto;min-width:58px;flex-direction:column;gap:2px;font-size:9px;padding:8px 4px 6px;border-left:none;border-top:2px solid transparent;text-align:center;align-items:center;white-space:nowrap;border-radius:0;}
+  .tab .ic{font-size:16px;width:auto;}
+  .tab.active{background:transparent;border-top-color:var(--ac);}
+  .main{margin-left:0;padding-bottom:70px;}
+  .topbar{padding:0 12px;height:50px;position:sticky;}
+  .ttitle{font-size:14px;}
+  .tdate{display:none;}
+  .topr{gap:6px;}
+  .btnp{padding:8px 12px;font-size:12px;}
+  #sum-print-btn,#liveplan-btn{display:none !important;}
+  .content{padding:12px;}
+  .mgrid{grid-template-columns:repeat(2,1fr) !important;gap:8px;}
+  .g2,.g3{grid-template-columns:1fr !important;}
+  .mc{padding:10px 12px;}
+  .mcv{font-size:17px;}
+  .mov{align-items:flex-end;padding-top:0;}
+  .modal{width:100% !important;max-width:100%;max-height:92vh;border-radius:14px 14px 0 0;}
+  .fgrid{grid-template-columns:1fr !important;}
+  table{font-size:11px;}
+  th,td{padding:8px 6px;}
+  .twrap{overflow-x:auto;}
+  .calg{gap:3px;}
+  .cd{font-size:8px;}
+}
+@media (min-width:861px){
+  .mobile-only{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="slogo">
+    <div class="smark">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="11" width="3" height="7" rx="1" fill="currentColor" opacity=".4"/>
+        <rect x="7" y="7" width="3" height="11" rx="1" fill="currentColor" opacity=".7"/>
+        <rect x="12" y="3" width="3" height="15" rx="1" fill="currentColor"/>
+        <polyline points="2,13 7,9 12,5 17,2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
+      </svg>
+    </div>
+    <div><div class="sbrand">Trade<span>Log</span></div><div class="ssub">Futures Journal</div></div>
+  </div>
+  <nav class="snav">
+    <span class="nsec">Hlavní</span>
+    <button class="tab active" onclick="sv('dashboard',this)"><span class="ic">⬡</span> Dashboard</button>
+    <button class="tab" onclick="sv('calendar',this)"><span class="ic">📅</span> Kalendar</button>
+    <button class="tab" onclick="sv('trades',this)"><span class="ic">📋</span> Obchody</button>
+    <span class="nsec">Analýza</span>
+    <button class="tab" onclick="sv('reports',this)"><span class="ic">📊</span> Reporty</button>
+    <button class="tab" onclick="sv('stats',this)"><span class="ic">🔬</span> Statistiky</button>
+    <button class="tab" onclick="sv('playbook',this)"><span class="ic">📖</span> Playbook</button>
+    <button class="tab" onclick="sv('psychology',this)"><span class="ic">🧠</span> Psychologie</button>
+    <span class="nsec">Záznamy</span>
+    <button class="tab" onclick="sv('summary',this)"><span class="ic">📋</span> Shrnutí</button>
+    <button class="tab" onclick="sv('daylog',this)"><span class="ic">📝</span> Denni zaznamy</button>
+    <button class="tab" onclick="sv('mistakes',this)"><span class="ic">⚠️</span> Chyby</button>
+    <button class="tab" onclick="sv('liveplan',this)"><span class="ic">🟢</span> Live Trading</button>
+  </nav>
+  <div class="sbot">
+    <div style="font-size:9px;color:var(--tx3);font-family:var(--mo);text-transform:uppercase;margin-bottom:4px;">Challenge</div>
+    <select class="acsel" id="account-sel" onchange="switchAccount(this.value)"></select>
+    <button class="setbtn" onclick="openSettings()">⚙️ Nastaveni a Data</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--gr);display:inline-block;opacity:.8;"></span>
+      <span class="ttitle" id="ttl">Dashboard</span>
+    </div>
+    <div class="topr">
+      <span class="tdate" id="topbar-date"></span>
+      <button id="sum-print-btn" class="btni" style="display:none;" onclick="printSummary()">🖨 Tisk</button>
+      <button id="liveplan-btn" class="btns" style="display:none;font-size:12px;padding:7px 12px;" onclick="sv('liveplan',null)">🟢 Denni plan</button>
+      <button class="btni" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="btnp" id="topbar-action" onclick="openModal()">+ Nový obchod</button>
+    </div>
+  </div>
+
+
+  <div class="content">
+
+  <div id="view-dashboard" class="view active">
+    <div class="tbar" id="target-bar"></div>
+    <div class="mgrid" id="metrics"></div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card" style="grid-column:span 2;"><div class="ctitle">Equity Curve</div><canvas id="eqChart" style="max-height:180px;"></canvas></div>
+    </div>
+    <div class="g3" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Win / Loss</div><canvas id="wlChart"></canvas></div>
+      <div class="card"><div class="ctitle">Setupy P&L</div><canvas id="setupChart"></canvas></div>
+      <div class="card"><div class="ctitle">Session P&L</div><canvas id="sesChart"></canvas></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Výkon dle hodiny</div><canvas id="hourChart"></canvas></div>
+      <div class="card"><div class="ctitle">Potenciál vs Realizováno</div><canvas id="potChart"></canvas></div>
+    </div>
+    <div class="twrap">
+      <div class="thdr"><span class="ttl2">Poslední obchody</span></div>
+      <table><thead><tr><th>Datum</th><th>Čas</th><th>Směr</th><th>Setup</th><th>Session</th><th>Výsledek</th><th>RRR</th><th>Plán</th><th>SS</th></tr></thead>
+      <tbody id="recent-tbody"></tbody></table>
+      <div id="recent-empty" class="empty" style="display:none;"><div class="eic">📊</div><p>Přidej první obchod</p></div>
+    </div>
+  </div>
+
+  <div id="view-calendar" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:20px;font-weight:800;" id="cal-title"></div>
+      <div style="display:flex;gap:8px;"><button class="btns" onclick="changeCalMonth(-1)">&#8249;</button><button class="btns" onclick="changeCalMonth(1)">&#8250;</button></div>
+    </div>
+    <div class="g3" style="margin-bottom:16px;" id="cal-month-stats"></div>
+    <div class="card" style="margin-bottom:16px;"><div class="calg" id="cal-grid"></div></div>
+    <div class="twrap">
+      <div class="thdr"><span class="ttl2" id="cal-trades-title">Obchody</span></div>
+      <table><thead><tr><th>Datum</th><th>Čas</th><th>Směr</th><th>Setup</th><th>Session</th><th>Výsledek</th><th>RRR</th><th>Plán</th></tr></thead>
+      <tbody id="cal-tbody"></tbody></table>
+      <div id="cal-empty" class="empty" style="display:none;"><div class="eic">📅</div><p>Žádné obchody</p></div>
+    </div>
+  </div>
+
+  <div id="view-trades" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="fsel" id="fSession" onchange="renderTrades()"><option value="">Všechny session</option><option>London</option><option>New York</option></select>
+        <select class="fsel" id="fSetup" onchange="renderTrades()"><option value="">Vsechny setupy</option></select>
+        <select class="fsel" id="fDir" onchange="renderTrades()"><option value="">Oba smery</option><option>Long</option><option>Short</option></select>
+        <select class="fsel" id="fResult" onchange="renderTrades()"><option value="">Vse</option><option value="win">Zisky</option><option value="loss">Ztraty</option></select>
+      </div>
+      <span style="font-size:11px;color:var(--tx3);font-family:var(--mo);" id="trades-count"></span>
+    </div>
+    <div class="twrap">
+      <table><thead><tr><th>Datum</th><th>Čas</th><th>Směr</th><th>Setup</th><th>Session</th><th>Výsledek</th><th>RRR</th><th>Potenciál</th><th>Plán</th><th>SS</th><th></th></tr></thead>
+      <tbody id="trades-tbody"></tbody></table>
+      <div id="trades-empty" class="empty" style="display:none;"><div class="eic">📋</div><p>Žádné obchody</p></div>
+    </div>
+  </div>
+
+  <div id="view-reports" class="view">
+    <div class="mgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;" id="report-metrics"></div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Expectancy</div><div id="exp-content" style="margin-top:6px;"></div></div>
+      <div class="card"><div class="ctitle">Konzistence</div><div id="cons-content" style="margin-top:6px;"></div></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Max Drawdown</div><div id="drawdown-content" style="margin-top:4px;"></div></div>
+      <div class="card"><div class="ctitle">Série výher / ztrát</div><div id="streak-content" style="margin-top:4px;"></div></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">P&L dle dne v týdnu</div><canvas id="weekdayChart"></canvas></div>
+      <div class="card"><div class="ctitle">P&L dle hodiny</div><canvas id="hourChart2"></canvas></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Kumulativní P&L</div><canvas id="cumChart"></canvas></div>
+      <div class="card"><div class="ctitle">Distribuce výsledků</div><canvas id="distChart"></canvas></div>
+    </div>
+    <div class="card"><div class="ctitle">Výkon dle setupu</div><div id="setup-detail" style="margin-top:8px;"></div></div>
+  </div>
+
+  <div id="view-playbook" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:20px;font-weight:800;">Playbook</div>
+      <button class="btnp" onclick="openPbForm()">+ Nový setup</button>
+    </div>
+    <div id="playbook-list"></div>
+    <div id="playbook-empty" class="empty" style="display:none;"><div class="eic">📖</div><p>Přidej první setup</p></div>
+    <div id="pb-form" style="display:none;background:var(--sf);border:1px solid var(--bd2);border-radius:var(--r);padding:20px;margin-top:16px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;" id="pb-form-title">Nový setup</div>
+      <div class="fgrid">
+        <div class="fg full"><label>Nazev</label><input type="text" id="pb-name"></div>
+        <div class="fg full"><label>Popis vstupu</label><textarea id="pb-desc" rows="3"></textarea></div>
+        <div class="fg full"><label>Výstup / TP</label><textarea id="pb-exit" rows="2"></textarea></div>
+        <div class="fg full"><label>Risk management</label><textarea id="pb-risk" rows="2"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btnp" onclick="savePb()">Uložit</button>
+        <button class="btns" onclick="closePbForm()">Zrušit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-psychology" class="view">
+    <div class="mgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;" id="psych-metrics"></div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Psychologie v čase</div><canvas id="psychChart"></canvas></div>
+      <div class="card"><div class="ctitle">Emoce vs Výsledek</div><canvas id="emotChart"></canvas></div>
+    </div>
+    <div class="twrap"><div class="thdr"><span class="ttl2">Zaznamy</span></div><div id="psych-list"></div></div>
+  </div>
+
+  <div id="view-summary" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:20px;font-weight:800;">Shrnutí</div>
+      <div style="display:flex;gap:8px;">
+        <button id="sw-btn" onclick="showSum('week')" class="btnp" style="font-size:12px;padding:7px 14px;">Týden</button>
+        <button id="sm-btn" onclick="showSum('month')" class="btns" style="font-size:12px;">Měsíc</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--tx3);font-family:var(--mo);margin-bottom:16px;" id="sum-period"></div>
+    <div class="mgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;" id="sum-metrics"></div>
+    <div class="g2" style="margin-bottom:14px;">
+      <div class="card"><div class="ctitle">Equity</div><canvas id="sumEqChart"></canvas></div>
+      <div class="card"><div class="ctitle">Win / Loss</div><canvas id="sumWlChart"></canvas></div>
+    </div>
+    <div class="twrap" style="margin-bottom:14px;">
+      <div class="thdr"><span class="ttl2" id="sum-trades-lbl">Obchody</span></div>
+      <table><thead><tr><th>Datum</th><th>Směr</th><th>Setup</th><th>Session</th><th>Výsledek</th><th>RRR</th><th>Plán</th></tr></thead>
+      <tbody id="sum-tbody"></tbody></table>
+      <div id="sum-empty" class="empty" style="display:none;"><div class="eic">📋</div><p>Žádné obchody</p></div>
+    </div>
+    <div class="card"><div class="ctitle">Poznamky</div><textarea id="sum-notes" rows="4" style="margin-top:8px;" oninput="saveSumNotes()"></textarea></div>
+  </div>
+
+  <div id="view-daylog" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:20px;font-weight:800;">Denní záznamy</div>
+      <button class="btnp" onclick="openDayModal()">+ Závěr dne</button>
+    </div>
+    <div class="twrap"><div id="day-list"></div>
+    <div id="day-empty" class="empty" style="display:none;"><div class="eic">📝</div><p>Žádné záznamy</p></div></div>
+  </div>
+
+  <div id="view-mistakes" class="view">
+    <div style="font-size:20px;font-weight:800;margin-bottom:18px;">Chyby & Disciplína</div>
+    <div class="mgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;" id="mistakes-metrics"></div>
+    <div id="mistakes-alert" style="display:none;background:var(--rdim);border:1px solid rgba(239,68,68,.3);border-radius:var(--rs);padding:14px 16px;margin-bottom:14px;font-size:13px;color:var(--tx2);"></div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card"><div class="ctitle">Ztrata z poruseni</div><canvas id="mistakesCumChart"></canvas></div>
+      <div class="card"><div class="ctitle">Poruseni dle dne</div><canvas id="mistakesWdChart"></canvas></div>
+    </div>
+    <div style="background:var(--adim);border:1px solid rgba(99,102,241,.25);border-radius:var(--r);padding:18px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--ac2);margin-bottom:10px;">Rady</div>
+      <div id="advice-list"></div>
+    </div>
+    <div class="twrap">
+      <div class="thdr"><span class="ttl2" id="mistakes-ttl">Obchody mimo pravidla</span></div>
+      <table><thead><tr><th>Datum</th><th>Session</th><th>Výsledek</th><th>RRR</th><th>Myšlenky</th></tr></thead>
+      <tbody id="mistakes-tbody"></tbody></table>
+      <div id="mistakes-empty" class="empty" style="display:none;"><div class="eic">✅</div><p>Žádná porušení!</p></div>
+    </div>
+  </div>
+
+  <div id="view-liveplan" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div><div style="font-size:20px;font-weight:800;">Live Trading — Denní plán</div><div style="font-size:12px;color:var(--tx3);font-family:var(--mo);margin-top:3px;" id="lp-date"></div></div>
+      <button class="btnd" onclick="resetLP()" style="font-size:12px;">Reset dne</button>
+    </div>
+    <div style="display:flex;margin-bottom:28px;position:relative;">
+      <div style="position:absolute;top:18px;left:10%;right:10%;height:2px;background:var(--bd);z-index:0;"></div>
+      <div id="prog-line" style="position:absolute;top:18px;left:10%;height:2px;background:var(--ac);z-index:1;transition:width .4s;width:0%;"></div>
+      <div onclick="goStep(1)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;z-index:2;"><div id="sd1" style="width:36px;height:36px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;">1</div><div style="font-size:10px;color:var(--ac2);font-weight:600;">TYP DNE</div></div>
+      <div onclick="goStep(2)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;z-index:2;"><div id="sd2" style="width:36px;height:36px;border-radius:50%;background:var(--sf3);border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--tx3);">2</div><div style="font-size:10px;color:var(--tx3);font-weight:600;">VP SHAPE</div></div>
+      <div onclick="goStep(3)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;z-index:2;"><div id="sd3" style="width:36px;height:36px;border-radius:50%;background:var(--sf3);border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--tx3);">3</div><div style="font-size:10px;color:var(--tx3);font-weight:600;">KONTEXT</div></div>
+      <div onclick="goStep(4)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;z-index:2;"><div id="sd4" style="width:36px;height:36px;border-radius:50%;background:var(--sf3);border:2px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--tx3);">4</div><div style="font-size:10px;color:var(--tx3);font-weight:600;">PLAN</div></div>
+    </div>
+    <div id="lp-s1">
+      <div style="text-align:center;margin-bottom:20px;"><div style="font-size:17px;font-weight:800;margin-bottom:6px;">Jaký je dnešní typ dne?</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:860px;margin:0 auto;">
+        <!-- NORMAL DAY -->
+        <div onclick="selDT('Normal Day')" id="dc-normal" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">📊</span><div><div style="font-size:13px;font-weight:800;">Normal Day</div><div style="font-size:10px;color:var(--ac2);font-family:var(--mo);">Nejčastější</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="18" x2="150" y2="18" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="52" x2="150" y2="52" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="21" fill="#6366f1" font-size="7">IBH</text>
+            <text x="2" y="55" fill="#6366f1" font-size="7">IBL</text>
+            <polyline points="20,35 32,22 42,48 52,28 62,42 72,25 82,40 92,30 102,44 112,26 124,36 136,38 146,35" fill="none" stroke="#a5f3fc" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ Cena drží poblíž IB<br>✓ Profilove D (balance)<br>✓ OUT-IN scalping, IB high/low klíč</div>
+        </div>
+
+        <!-- NORMAL VARIATION -->
+        <div onclick="selDT('Normal Variation')" id="dc-normalvar" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">📐</span><div><div style="font-size:13px;font-weight:800;">Normal Variation</div><div style="font-size:10px;color:var(--yw);font-family:var(--mo);">Balance → Imbalance</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="50" x2="150" y2="50" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="62" x2="80" y2="62" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="53" fill="#6366f1" font-size="7">IBH</text>
+            <text x="2" y="65" fill="#6366f1" font-size="7">IBL</text>
+            <polyline points="20,56 32,60 42,54 52,58 62,52 72,56 82,50 94,40 106,28 118,18 132,12 144,10" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ IB začne balance<br>✓ BO na jednu stranu až 50% IB<br>✓ Klíč: IB break and retest</div>
+        </div>
+
+        <!-- NEUTRAL DAY -->
+        <div onclick="selDT('Neutral Day')" id="dc-neutral" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">⚖️</span><div><div style="font-size:13px;font-weight:800;">Neutral Day</div><div style="font-size:10px;color:var(--cy);font-family:var(--mo);">Oboustranný</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="12" x2="150" y2="12" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="58" x2="150" y2="58" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="15" fill="#6366f1" font-size="7">IBH</text>
+            <text x="2" y="61" fill="#6366f1" font-size="7">IBL</text>
+            <!-- VP shape D na leve strane -->
+            <ellipse cx="22" cy="35" rx="10" ry="22" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2"/>
+            <polyline points="35,35 45,14 55,50 65,12 75,42 85,58 95,30 105,55 115,20 130,35 142,38" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ BO jednu stranu + pak druhou<br>✓ IBH i IBL breaknuty<br>✓ Trh uzavře uvnitř IB, OUT-IN</div>
+        </div>
+
+        <!-- NEUTRAL EXTREME -->
+        <div onclick="selDT('Neutral Extreme')" id="dc-neutralext" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">🔄</span><div><div style="font-size:13px;font-weight:800;">Neutral Extreme</div><div style="font-size:10px;color:var(--pu);font-family:var(--mo);">Změna trendu</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="12" x2="150" y2="12" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="58" x2="150" y2="58" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="15" fill="#6366f1" font-size="7">IBH</text>
+            <text x="2" y="61" fill="#6366f1" font-size="7">IBL</text>
+            <polyline points="20,35 30,14 40,35 50,56 60,35 70,12 82,28 94,58 108,40 122,18 136,10 148,12" fill="none" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+            <!-- close u extremu - sipka -->
+            <polygon points="148,8 154,12 148,16" fill="#a855f7"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ BO obe strany IB<br>✓ Uzavře v extrémním kvartálu<br>✓ OUT-IN + koncem dne trend</div>
+        </div>
+
+        <!-- NON-TREND DAY -->
+        <div onclick="selDT('Non-Trend Day')" id="dc-nontrend" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">😴</span><div><div style="font-size:13px;font-weight:800;">Non-Trend Day</div><div style="font-size:10px;color:var(--rd);font-family:var(--mo);">Netradovat!</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="25" x2="150" y2="25" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="45" x2="150" y2="45" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="28" fill="#ef4444" font-size="7">IBH</text>
+            <text x="2" y="48" fill="#ef4444" font-size="7">IBL</text>
+            <polyline points="20,35 32,34 44,36 56,34 68,35 80,34 92,36 104,35 116,34 128,35 140,35" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ Malý IB, žádný BO<br>✓ Malá volume, holidays<br><span style="color:var(--rd);">⛔ Doporuceni: NETRADOVAT</span></div>
+        </div>
+
+        <!-- TREND DAY -->
+        <div onclick="selDT('Trend Day')" id="dc-trend" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">🚀</span><div><div style="font-size:13px;font-weight:800;">Trend Day</div><div style="font-size:10px;color:var(--gr);font-family:var(--mo);">Nejvýkonnější</div></div></div>
+          <svg viewBox="0 0 160 70" style="width:100%;height:55px;margin-bottom:8px;display:block;">
+            <line x1="10" y1="58" x2="55" y2="58" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <line x1="10" y1="64" x2="55" y2="64" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4"/>
+            <text x="2" y="61" fill="#6366f1" font-size="7">IBH</text>
+            <text x="2" y="68" fill="#6366f1" font-size="6">IBL</text>
+            <!-- VP skewed left (uzke IB) -->
+            <path d="M12,58 Q20,40 14,20 Q20,40 12,58" fill="rgba(99,102,241,0.15)" stroke="#6366f1" stroke-width="1"/>
+            <polyline points="22,62 32,58 42,54 52,50 62,42 74,32 86,22 98,14 110,8 124,5 138,3 150,2" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6;">✓ Úzké IB, range 3-4x IB<br>✓ Close u extrému dne<br>✓ Velký objem, OTF, IN-OUT</div>
+        </div>
+
+        <!-- MULTI DISTRIBUTION -->
+        <div onclick="selDT('Multi Distribution')" id="dc-multi" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;grid-column:1/-1;">
+          <div style="display:flex;align-items:flex-start;gap:20px;">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:18px;">🏔</span><div><div style="font-size:13px;font-weight:800;">Multi Distribution Trend Day</div><div style="font-size:10px;color:var(--yw);font-family:var(--mo);">Nejkomplexnější</div></div></div>
+              <div style="font-size:11px;color:var(--tx3);line-height:1.7;">✓ Uzke IB jako Trend Day &nbsp; ✓ Více distribucí v průběhu trendu<br>✓ Pauzy a balancing mezi pohyby &nbsp; ✓ IN-OUT na každé distribuci<br>✓ Close u extrému, silný OTF zájem</div>
+            </div>
+            <div style="flex:1.2;">
+              <svg viewBox="0 0 220 70" style="width:100%;height:65px;display:block;">
+                <line x1="5" y1="62" x2="45" y2="62" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3"/>
+                <line x1="5" y1="67" x2="45" y2="67" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3"/>
+                <text x="0" y="65" fill="#6366f1" font-size="6">IBH</text>
+                <!-- distribution 1 -->
+                <rect x="44" y="50" width="14" height="18" fill="rgba(99,102,241,0.12)" rx="2"/>
+                <text x="46" y="48" fill="#94a3b8" font-size="6">D1</text>
+                <!-- distribution 2 -->
+                <rect x="84" y="30" width="14" height="20" fill="rgba(99,102,241,0.12)" rx="2"/>
+                <text x="86" y="28" fill="#94a3b8" font-size="6">D2</text>
+                <!-- distribution 3 -->
+                <rect x="128" y="10" width="14" height="20" fill="rgba(99,102,241,0.12)" rx="2"/>
+                <text x="130" y="8" fill="#94a3b8" font-size="6">D3</text>
+                <polyline points="18,65 28,62 38,60 44,58 50,54 56,56 62,52 68,50 74,48 84,42 90,36 96,34 102,32 108,30 114,28 128,22 134,16 140,14 146,12 152,10 160,8 168,6 176,5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:22px;"><button class="btnp" onclick="goStep(2)" id="s1next" style="padding:10px 28px;opacity:.5;cursor:not-allowed;" disabled>Dalsi</button></div>
+    </div>
+    <div id="lp-s2" style="display:none;">
+      <div style="text-align:center;margin-bottom:20px;"><div style="font-size:17px;font-weight:800;">Tvar Volume Profile?</div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:700px;margin:0 auto;">
+        <div onclick="selVP('D')" id="vpc-D" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">🔔</div><div style="font-size:13px;font-weight:700;">D - Balance</div><div style="font-size:10px;color:var(--tx3);">Symetricky, POC uprostred</div></div>
+        <div onclick="selVP('b')" id="vpc-b" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">🐝</div><div style="font-size:13px;font-weight:700;">b - Buying tail</div><div style="font-size:10px;color:var(--tx3);">Aktivita nahore</div></div>
+        <div onclick="selVP('p')" id="vpc-p" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">🐧</div><div style="font-size:13px;font-weight:700;">p - Selling tail</div><div style="font-size:10px;color:var(--tx3);">Aktivita dole</div></div>
+        <div onclick="selVP('B')" id="vpc-B" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">🏔</div><div style="font-size:13px;font-weight:700;">B - Double Dist.</div><div style="font-size:10px;color:var(--tx3);">Dve distribuce</div></div>
+        <div onclick="selVP('Skewed High')" id="vpc-sh" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">⬆️</div><div style="font-size:13px;font-weight:700;">Skewed High</div><div style="font-size:10px;color:var(--tx3);">POC nahore</div></div>
+        <div onclick="selVP('Skewed Low')" id="vpc-sl" style="background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;text-align:center;"><div style="font-size:24px;margin-bottom:6px;">⬇️</div><div style="font-size:13px;font-weight:700;">Skewed Low</div><div style="font-size:10px;color:var(--tx3);">POC dole</div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:22px;">
+        <button class="btns" onclick="goStep(1)">Zpet</button>
+        <button class="btnp" onclick="goStep(3)" id="s2next" style="padding:10px 28px;opacity:.5;cursor:not-allowed;" disabled>Dalsi</button>
+      </div>
+    </div>
+    <div id="lp-s3" style="display:none;">
+      <div style="text-align:center;margin-bottom:20px;"><div style="font-size:17px;font-weight:800;">Kontext trhu</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:700px;margin:0 auto 20px;">
+        <div class="card"><div class="ctitle">Open Type</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <div onclick="selCtx('ot','OAIR',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">OAIR</div>
+            <div onclick="selCtx('ot','OAOR',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">OAOR</div>
+            <div onclick="selCtx('ot','OD',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">Open Drive</div>
+            <div onclick="selCtx('ot','ORR',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">Open Rejection Reverse</div>
+          </div>
+        </div>
+        <div class="card"><div class="ctitle">HTF Trend</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <div onclick="selCtx('trend','bullish',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;color:var(--gr);">Bullish</div>
+            <div onclick="selCtx('trend','bearish',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;color:var(--rd);">Bearish</div>
+            <div onclick="selCtx('trend','balance',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;color:var(--yw);">Balance</div>
+          </div>
+        </div>
+        <div class="card"><div class="ctitle">Initial Balance</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <div onclick="selCtx('ib','narrow',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">Uzky &lt;10</div>
+            <div onclick="selCtx('ib','normal',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">Normalni 10-20</div>
+            <div onclick="selCtx('ib','wide',this)" style="padding:8px 12px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;font-size:12px;font-weight:600;">Siroky &gt;20</div>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:700px;margin:0 auto;"><div class="card"><div class="ctitle">Poznamka</div><textarea id="lp-note" rows="2" style="margin-top:6px;" oninput="lpSaveNote()"></textarea></div></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+        <button class="btns" onclick="goStep(2)">Zpet</button>
+        <button class="btnp" onclick="goStep(4);genPlan()">Generovat plán</button>
+      </div>
+    </div>
+    <div id="lp-s4" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="lp-badges"></div>
+      <div style="background:var(--adim);border:1px solid rgba(99,102,241,.3);border-radius:var(--r);padding:20px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="font-size:18px;">🎯</span><div style="font-size:14px;font-weight:800;color:var(--ac2);">Doporučené setupy</div><div id="lp-stat-badge" style="margin-left:auto;font-size:10px;color:var(--tx3);font-family:var(--mo);"></div></div>
+        <div id="lp-setups"></div>
+      </div>
+      <div style="background:var(--ydim);border:1px solid rgba(245,158,11,.25);border-radius:var(--r);padding:20px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="font-size:18px;">⚠️</span><div style="font-size:14px;font-weight:800;color:var(--yw);">Na co si dát pozor</div></div>
+        <div id="lp-warnings"></div>
+      </div>
+      <div style="background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.25);border-radius:var(--r);padding:20px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="font-size:18px;">🧠</span><div style="font-size:14px;font-weight:800;color:var(--pu);">Psychologická připomínka</div></div>
+        <div id="lp-psych" style="font-size:13px;color:var(--tx2);line-height:1.8;"></div>
+      </div>
+      <div class="card" style="margin-bottom:14px;"><div class="ctitle">Pre-trade checklist</div><div id="lp-checklist" style="margin-top:8px;"></div></div>
+      <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Zpětná vazba po session</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="fg"><label>Byl plán správný?</label><select id="lp-fb-ok" onchange="lpSaveFB()" style="font-size:12px;"><option value="">---</option><option value="yes">Ano</option><option value="partial">Castecne</option><option value="no">Ne</option></select></div>
+          <div class="fg"><label>Skutečný typ dne</label><select id="lp-fb-actual" onchange="lpSaveFB()" style="font-size:12px;"><option value="">---</option><option>Normal Day</option><option>Normal Variation</option><option>Neutral Day</option><option>Neutral Extreme</option><option>Non-Trend Day</option><option>Trend Day</option><option>Multi Distribution</option></select></div>
+          <div class="fg full"><label>Poznamka</label><textarea id="lp-fb-note" rows="2" oninput="lpSaveFB()" style="font-size:12px;min-height:50px;"></textarea></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;"><button class="btns" onclick="goStep(3)">Upravit</button></div>
+    </div>
+  </div>
+
+  <div id="view-stats" class="view">
+    <div style="font-size:20px;font-weight:800;margin-bottom:18px;">Statistiky & Pravděpodobnosti</div>
+    <div class="mgrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;" id="stats-metrics"></div>
+    <!-- Den x Setup heatmapa -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="ctitle">Win Rate: Typ dne × Setup</div>
+      <div id="stats-heatmap" style="margin-top:10px;overflow-x:auto;"></div>
+    </div>
+    <!-- Typ dne stats tabulka -->
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="ctitle">Výkon dle typu dne</div>
+        <div id="stats-daytype" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Výkon dle Open Type</div>
+        <div id="stats-opentype" style="margin-top:8px;"></div>
+      </div>
+    </div>
+    <!-- Fáze + Execution -->
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="ctitle">Výkon dle fáze dne</div>
+        <div id="stats-phase" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Execution Quality vs Výsledek</div>
+        <canvas id="stats-execChart" style="max-height:200px;"></canvas>
+      </div>
+    </div>
+    <!-- Chyby -->
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="ctitle">Analýza chyb</div>
+        <div id="stats-mistakes" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">P&L dle Execution Quality</div>
+        <canvas id="stats-execPnlChart" style="max-height:200px;"></canvas>
+      </div>
+    </div>
+    <!-- Setup A: IB Break & Retest specifika -->
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="ctitle">Kvalita retestu vs. výsledek</div>
+        <div id="stats-retest" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Exit T2 — mechanicky vs. ručně</div>
+        <div id="stats-exit" style="margin-top:8px;"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="ctitle">IB/ADR ratio — úzká vs. široká IB</div>
+      <div id="stats-ibadr" style="margin-top:8px;"></div>
+    </div>
+    <!-- Top kombinace -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="ctitle">Top kombinace (min. 3 trade)</div>
+      <div id="stats-combos" style="margin-top:8px;overflow-x:auto;"></div>
+    </div>
+  </div>
+
+  </div>
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="mov" id="tradeModal">
+  <div class="modal">
+    <div class="mhdr"><span class="mtitle" id="modal-title">Novy obchod</span><button class="xbtn" onclick="closeModal()">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg"><label>Datum</label><input type="date" id="f-date"></div>
+        <div class="fg"><label>Čas</label><input type="time" id="f-time" oninput="autoSess(this.value)"></div>
+        <div class="fg"><label>Směr</label><select id="f-dir"><option>Long</option><option>Short</option></select></div>
+        <div class="fg"><label>Session</label><select id="f-sess"><option>London</option><option>New York</option></select></div>
+        <div class="fg full"><label>Setup</label><select id="f-setup"></select></div>
+        <div class="fg"><label>Typ dne</label><select id="f-daytype"><option value="">—</option><option>Normal Day</option><option>Normal Variation</option><option>Neutral Day</option><option>Neutral Extreme</option><option>Non-Trend Day</option><option>Trend Day</option><option>Multi Distribution</option></select></div>
+        <div class="fg"><label>Open Type</label><select id="f-opentype"><option value="">—</option><option>OAIR</option><option>OAOR</option><option>Open Drive</option><option>Open Rejection Reverse</option></select></div>
+        <div class="fg"><label>Fáze dne</label><select id="f-phase"><option value="">—</option><option>IB</option><option>Post-IB</option><option>Afternoon</option></select></div>
+        <div class="fg"><label>Chyba</label><select id="f-mistake"><option value="none">Žádná</option><option value="skipped">Přeskočen setup</option><option value="early_exit">Předčasný výstup</option><option value="oversized">Převelká pozice</option><option value="revenge">Revenge trade</option><option value="no_plan">Bez plánu</option><option value="fomo">FOMO vstup</option></select></div>
+        <div style="grid-column:1/-1;border-top:1px solid var(--bd);margin:4px 0;"></div>
+        <div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ac2);text-transform:uppercase;letter-spacing:.5px;">Setup A — IB Break & Retest</div>
+        <div class="fg"><label>IB / ADR ratio (%)</label><input type="number" id="f-ibadr" placeholder="např. 22" step="1" min="0" max="200"></div>
+        <div class="fg"><label>IB tvar</label><select id="f-ibshape"><option value="">—</option><option value="P">P-shape (bias long)</option><option value="b">b-shape (bias short)</option><option value="D">D / symetrický</option></select></div>
+        <div class="fg"><label>Kvalita retestu</label><select id="f-retest"><option value="">—</option><option value="quality">Kvalitní (mělký, rychlý, klesající objem)</option><option value="medium">Střední</option><option value="poor">Nekvalitní (hluboký, pomalý, rostoucí objem)</option></select></div>
+        <div class="fg"><label>Time window</label><select id="f-timewin"><option value="">—</option><option value="first30">0–30 min po IB</option><option value="first60">30–60 min po IB</option><option value="after60">60+ min po IB</option></select></div>
+        <div class="fg"><label>Exit T1</label><select id="f-exitt1"><option value="">—</option><option value="mechanic">Mechanicky (bracket)</option><option value="manual">Ručně</option><option value="none">Nedosaženo</option></select></div>
+        <div class="fg"><label>Exit T2 / trail</label><select id="f-exitt2"><option value="">—</option><option value="mechanic">Mechanicky (trail)</option><option value="manual">Ručně / zavřel jsem brzy</option><option value="none">Nedosaženo / stop</option></select></div>
+        <div class="fg full"><label>Execution Quality: <span id="sv-eq" style="color:var(--ac2);font-weight:700;">3</span>/5</label><input type="range" id="f-execq" min="1" max="5" value="3" oninput="document.getElementById('sv-eq').textContent=this.value"></div>
+        <div class="fg"><label>Výsledek ($)</label><input type="number" id="f-result" placeholder="-250 nebo 350" step="0.01"></div>
+        <div class="fg"><label>RRR dosažené</label><input type="number" id="f-rrr" placeholder="1.5" step="0.1" min="0"></div>
+        <div class="fg"><label>Potenciál RRR</label><input type="number" id="f-pot" placeholder="3.0" step="0.1" min="0"></div>
+        <div class="fg"><label>SL</label><select id="f-sl"><option value="yes">Dodrzeeen</option><option value="no">Porusen</option><option value="manual">Manualne</option></select></div>
+        <div class="fg"><label>Plan</label><select id="f-plan"><option value="yes">Dodrzeeen</option><option value="partial">Castecne</option><option value="no">Porusen</option></select></div>
+        <div style="grid-column:1/-1;border-top:1px solid var(--bd);margin:4px 0;"></div>
+        <div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ac2);text-transform:uppercase;letter-spacing:.5px;">Psychologie</div>
+        <div class="fg full">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="slrow"><span class="sllbl">Disciplina</span><input type="range" id="p-disc" min="1" max="5" value="3" oninput="document.getElementById('sv-d').textContent=this.value"><span class="slval" id="sv-d">3</span></div>
+            <div class="slrow"><span class="sllbl">Klid</span><input type="range" id="p-calm" min="1" max="5" value="3" oninput="document.getElementById('sv-c').textContent=this.value"><span class="slval" id="sv-c">3</span></div>
+            <div class="slrow"><span class="sllbl">Duvera</span><input type="range" id="p-conf" min="1" max="5" value="3" oninput="document.getElementById('sv-cf').textContent=this.value"><span class="slval" id="sv-cf">3</span></div>
+            <div class="slrow"><span class="sllbl">Emoce</span><input type="range" id="p-emot" min="1" max="5" value="3" oninput="document.getElementById('sv-e').textContent=this.value"><span class="slval" id="sv-e">3</span></div>
+          </div>
+        </div>
+        <div style="grid-column:1/-1;border-top:1px solid var(--bd);margin:4px 0;"></div>
+        <div class="fg full"><label>Myšlenky</label><textarea id="f-thoughts"></textarea></div>
+        <div class="fg full"><label>Poučení</label><textarea id="f-lesson"></textarea></div>
+        <div class="fg full"><label>Screenshot URL</label><input type="url" id="f-ss" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btns" onclick="closeModal()">Zrušit</button><button class="btnp" onclick="saveTrade()">Uložit</button></div>
+  </div>
+</div>
+<div class="mov" id="dayModal">
+  <div class="modal" style="width:560px;">
+    <div class="mhdr"><span class="mtitle">Závěr dne</span><button class="xbtn" onclick="closeDayModal()">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg full"><label>Datum</label><input type="date" id="d-date"></div>
+        <div class="fg full"><label>Co šlo dobře</label><textarea id="d-good"></textarea></div>
+        <div class="fg full"><label>Co zlepšit</label><textarea id="d-bad"></textarea></div>
+        <div class="fg full"><label>Shrnutí</label><textarea id="d-sum" style="min-height:80px;"></textarea></div>
+        <div class="fg full"><label>Nálada: <span id="sv-mood" style="color:var(--ac2);font-weight:700;">3</span></label><input type="range" id="d-mood" min="1" max="5" value="3" oninput="document.getElementById('sv-mood').textContent=this.value"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btns" onclick="closeDayModal()">Zrušit</button><button class="btnp" onclick="saveDaySum()">Uložit</button></div>
+  </div>
+</div>
+<div class="mov" id="settingsModal">
+  <div class="modal" style="width:540px;">
+    <div class="mhdr"><span class="mtitle">Nastaveni</span><button class="xbtn" onclick="closeSettings()">✕</button></div>
+    <div class="mbody" style="display:flex;flex-direction:column;gap:14px;">
+      <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--tx3);font-family:var(--mo);margin-bottom:10px;">Challenges</div>
+        <div id="accounts-list" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="new-acc" placeholder="Název challenge..." style="flex:1;min-width:120px;">
+          <input type="number" id="new-acc-target" placeholder="Cíl ($)" style="width:90px;" value="3000">
+          <button onclick="addAccount()" class="btnp" style="padding:9px 14px;white-space:nowrap;">+ Přidat</button>
+        </div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--tx3);font-family:var(--mo);margin-bottom:10px;">Setupy</div>
+        <div id="setups-list" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;"><input type="text" id="new-setup" placeholder="Název..."><button onclick="addSetup()" class="btnp" style="padding:9px 14px;white-space:nowrap;">+ Přidat</button></div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--tx3);font-family:var(--mo);margin-bottom:10px;">Data</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="exportData()" class="btns">Export</button>
+          <label class="btns" style="cursor:pointer;">Import<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+        </div>
+      </div>
+      <div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:14px;">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--tx3);font-family:var(--mo);margin-bottom:10px;">Smazat</div>
+        <button onclick="deleteAll()" class="btnd">Smazat obchody aktivní challenge</button>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btns" onclick="closeSettings()">Zavřít</button></div>
+  </div>
+</div>
+
+<script>
+var DEF_SETUPS = ["Balance - ASIA>POC","Balance - ON>POC","Imbalance - odraz IB","Imbalance - odraz P-IB","Imbalance - Odraz od POC","Mimo pravidla"];
+var accounts = JSON.parse(localStorage.getItem("tj_accounts") || '[{"id":"acc1","name":"Challenge 1"}]');
+var activeAcc = localStorage.getItem("tj_active_acc") || "acc1";
+var setups = JSON.parse(localStorage.getItem("tj_setups") || JSON.stringify(DEF_SETUPS));
+var playbooks = JSON.parse(localStorage.getItem("tj_playbooks") || "[]");
+var trades = [];
+var days = [];
+var editId = null;
+var CH = {};
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth();
+var sumMode = "week";
+var editPbId = null;
+var lpState = {};
+var MNS = ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"];
+
+function tKey(id) { return "tj_trades_" + id; }
+function dKey(id) { return "tj_days_" + id; }
+function saveAccounts() { localStorage.setItem("tj_accounts", JSON.stringify(accounts)); }
+function saveSetups() { localStorage.setItem("tj_setups", JSON.stringify(setups)); }
+function savePlaybooks() { localStorage.setItem("tj_playbooks", JSON.stringify(playbooks)); }
+
+// Migrate old data
+(function() {
+  var oldT = localStorage.getItem("tj_trades");
+  var newT = localStorage.getItem(tKey("acc1"));
+  if (oldT && (!newT || newT === "[]")) {
+    localStorage.setItem(tKey("acc1"), oldT);
+    var oldD = localStorage.getItem("tj_days");
+    if (oldD) { localStorage.setItem(dKey("acc1"), oldD); }
+  }
+})();
+
+function loadData() {
+  trades = JSON.parse(localStorage.getItem(tKey(activeAcc)) || "[]");
+  days = JSON.parse(localStorage.getItem(dKey(activeAcc)) || "[]");
+}
+function save() {
+  localStorage.setItem(tKey(activeAcc), JSON.stringify(trades));
+  localStorage.setItem(dKey(activeAcc), JSON.stringify(days));
+}
+function fd(d) { if (!d) return ""; var p = d.split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+function fm(n) { return (n > 0 ? "+" : "") + n.toFixed(2) + " $"; }
+function dc(id) { if (CH[id]) { CH[id].destroy(); delete CH[id]; } }
+
+function mkOpts(extra) {
+  var o = {
+    responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: "#64748b", font: { family: "JetBrains Mono", size: 10 } }, grid: { color: "rgba(30,45,69,.4)" } },
+      y: { ticks: { color: "#64748b", font: { family: "JetBrains Mono", size: 10 } }, grid: { color: "rgba(30,45,69,.4)" } }
+    }
+  };
+  if (extra) {
+    if (extra.plugins) o.plugins = extra.plugins;
+    if (extra.scales) o.scales = extra.scales;
+  }
+  return o;
+}
+function mkLegOpts() {
+  return mkOpts({ plugins: { legend: { display: true, labels: { color: "#64748b", font: { family: "JetBrains Mono", size: 10 } } } } });
+}
+
+// Theme
+function toggleTheme() {
+  var d = document.documentElement.classList.toggle("dark");
+  localStorage.setItem("tj_theme", d ? "dark" : "light");
+  document.getElementById("themeBtn").textContent = d ? "☀️" : "🌙";
+}
+(function() {
+  if (localStorage.getItem("tj_theme") === "dark") {
+    document.documentElement.classList.add("dark");
+    document.getElementById("themeBtn").textContent = "☀️";
+  }
+})();
+
+document.getElementById("topbar-date").textContent = new Date().toLocaleDateString("cs-CZ", { weekday: "short", day: "numeric", month: "long" });
+
+var VTITLES = {
+  dashboard:"Dashboard", calendar:"Kalendář", trades:"Obchody", reports:"Reporty",
+  stats:"Statistiky & Pravděpodobnosti", playbook:"Playbook", psychology:"Psychologie", summary:"Shrnutí",
+  daylog:"Denní záznamy", mistakes:"Chyby & Disciplína", liveplan:"Live Trading"
+};
+
+function sv(v, btn) {
+  document.querySelectorAll(".view").forEach(function(e) { e.classList.remove("active"); });
+  document.querySelectorAll(".tab").forEach(function(e) { e.classList.remove("active"); });
+  document.getElementById("view-" + v).classList.add("active");
+  if (btn) btn.classList.add("active");
+  document.getElementById("ttl").textContent = VTITLES[v] || v;
+  var pb = document.getElementById("sum-print-btn");
+  var pa = document.getElementById("topbar-action");
+  if (pb) pb.style.display = v === "summary" ? "inline-block" : "none";
+  var lpb = document.getElementById("liveplan-btn");
+  if (lpb) lpb.style.display = (v === "dashboard" || v === "trades" || v === "calendar") ? "inline-block" : "none";
+  if (pa) {
+    pa.style.display = v === "liveplan" ? "none" : "inline-block";
+    if (v === "daylog") { pa.textContent = "+ Závěr dne"; pa.setAttribute("onclick", "openDayModal()"); }
+    else { pa.textContent = "+ Nový obchod"; pa.setAttribute("onclick", "openModal()"); }
+  }
+  if (v === "dashboard") renderDash();
+  if (v === "calendar") renderCal();
+  if (v === "trades") renderTrades();
+  if (v === "reports") renderReports();
+  if (v === "stats") renderStats();
+  if (v === "playbook") renderPb();
+  if (v === "psychology") renderPsych();
+  if (v === "summary") showSum(sumMode);
+  if (v === "daylog") renderDayLog();
+  if (v === "mistakes") renderMistakes();
+  if (v === "liveplan") renderLP();
+}
+
+// Accounts
+function updateAccSel() {
+  var s = document.getElementById("account-sel");
+  if (!s) return;
+  s.innerHTML = accounts.map(function(a) {
+    return '<option value="' + a.id + '"' + (a.id === activeAcc ? " selected" : "") + ">" + a.name + "</option>";
+  }).join("");
+}
+function switchAccount(id) {
+  activeAcc = id; localStorage.setItem("tj_active_acc", id); loadData();
+  renderDash(); renderTrades(); updateAccSel();
+}
+function addAccount() {
+  var n = document.getElementById("new-acc").value.trim(); if (!n) return;
+  var tgt = parseFloat(document.getElementById("new-acc-target").value) || 3000;
+  var id = "acc" + Date.now(); accounts.push({ id: id, name: n, target: tgt });
+  saveAccounts(); document.getElementById("new-acc").value = ""; document.getElementById("new-acc-target").value = "";
+  renderAccountsList(); updateAccSel();
+}
+function renameAccount(id) {
+  var a = accounts.find(function(x) { return x.id === id; });
+  var n = prompt("Novy nazev:", a.name); if (!n) return;
+  a.name = n.trim(); saveAccounts(); renderAccountsList(); updateAccSel();
+}
+function deleteAccount(id) {
+  if (accounts.length <= 1) { alert("Musi byt alespon jedna challenge."); return; }
+  if (!confirm("Smazat?")) return;
+  localStorage.removeItem(tKey(id)); localStorage.removeItem(dKey(id));
+  accounts = accounts.filter(function(a) { return a.id !== id; }); saveAccounts();
+  if (activeAcc === id) { activeAcc = accounts[0].id; localStorage.setItem("tj_active_acc", activeAcc); loadData(); renderDash(); renderTrades(); }
+  renderAccountsList(); updateAccSel();
+}
+function renderAccountsList() {
+  var el = document.getElementById("accounts-list"); if (!el) return;
+  el.innerHTML = accounts.map(function(a) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);">'
+      + '<span style="flex:1;font-family:var(--mo);font-size:12px;' + (a.id === activeAcc ? "color:var(--ac2);font-weight:700;" : "") + '">'
+      + (a.id === activeAcc ? "▶ " : "") + a.name + '</span>'
+      + '<button onclick="switchAccount(\'' + a.id + '\');closeSettings();" class="btnp" style="font-size:11px;padding:3px 8px;">Aktivovat</button>'
+      + '<button onclick="renameAccount(\'' + a.id + '\')" class="btns" style="font-size:11px;padding:3px 7px;">E</button>'
+      + '<button onclick="deleteAccount(\'' + a.id + '\')" class="btnd" style="font-size:11px;padding:3px 7px;">X</button></div>';
+  }).join("");
+}
+
+// Setups
+function updateSetupSels() {
+  var opts = setups.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join("");
+  var fs = document.getElementById("f-setup");
+  var ft = document.getElementById("fSetup");
+  if (fs) fs.innerHTML = opts;
+  if (ft) ft.innerHTML = '<option value="">Vsechny setupy</option>' + opts;
+}
+function renderSetupsList() {
+  var el = document.getElementById("setups-list"); if (!el) return;
+  el.innerHTML = setups.map(function(s, i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);">'
+      + '<span style="flex:1;font-family:var(--mo);font-size:12px;">' + s + "</span>"
+      + '<button onclick="renameSetup(' + i + ')" class="btns" style="font-size:11px;padding:3px 7px;">E</button>'
+      + '<button onclick="deleteSetup(' + i + ')" class="btnd" style="font-size:11px;padding:3px 7px;">X</button></div>';
+  }).join("");
+}
+function addSetup() {
+  var n = document.getElementById("new-setup").value.trim(); if (!n) return;
+  setups.push(n); saveSetups(); document.getElementById("new-setup").value = "";
+  renderSetupsList(); updateSetupSels();
+}
+function deleteSetup(i) { if (!confirm("Smazat?")) return; setups.splice(i, 1); saveSetups(); renderSetupsList(); updateSetupSels(); }
+function renameSetup(i) { var n = prompt("Novy nazev:", setups[i]); if (!n) return; setups[i] = n.trim(); saveSetups(); renderSetupsList(); updateSetupSels(); }
+
+function autoSess(t) {
+  if (!t) return;
+  var parts = t.split(":"); var mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  var s = document.getElementById("f-sess");
+  if (mins >= 870 && mins <= 1260) s.value = "New York";
+  else if (mins >= 480 && mins < 870) s.value = "London";
+}
+
+// Modal
+function openModal(id) {
+  if (id === undefined) id = null;
+  editId = id; updateSetupSels();
+  var modal = document.getElementById("tradeModal");
+  if (id) {
+    var t = trades.find(function(x) { return x.id === id; });
+    if (!t) { id = null; editId = null; }
+    if (t) {
+      document.getElementById("modal-title").textContent = "Upravit obchod";
+      document.getElementById("f-date").value = t.date || "";
+      document.getElementById("f-time").value = t.time || "";
+      document.getElementById("f-result").value = t.result || "";
+      document.getElementById("f-rrr").value = t.rrr || "";
+      document.getElementById("f-pot").value = t.potential || "";
+      document.getElementById("f-thoughts").value = t.thoughts || "";
+      document.getElementById("f-lesson").value = t.lesson || "";
+      document.getElementById("f-ss").value = t.screenshot || "";
+      document.getElementById("f-dir").value = t.direction || "Long";
+      document.getElementById("f-sess").value = t.session || "London";
+      document.getElementById("f-setup").value = t.setup || "";
+      document.getElementById("f-sl").value = t.sl || "yes";
+      document.getElementById("f-plan").value = t.plan || "yes";
+      document.getElementById("p-disc").value = t.discipline || 3; document.getElementById("sv-d").textContent = t.discipline || 3;
+      document.getElementById("p-calm").value = t.calm || 3; document.getElementById("sv-c").textContent = t.calm || 3;
+      document.getElementById("p-conf").value = t.confidence || 3; document.getElementById("sv-cf").textContent = t.confidence || 3;
+      document.getElementById("p-emot").value = t.emotion || 3; document.getElementById("sv-e").textContent = t.emotion || 3;
+      document.getElementById("f-daytype").value = t.dayType || "";
+      document.getElementById("f-opentype").value = t.openType || "";
+      document.getElementById("f-phase").value = t.phase || "";
+      document.getElementById("f-execq").value = t.execQuality || 3; document.getElementById("sv-eq").textContent = t.execQuality || 3;
+      document.getElementById("f-mistake").value = t.mistakeType || "none";
+      document.getElementById("f-ibadr").value = t.ibAdrRatio || "";
+      document.getElementById("f-ibshape").value = t.ibShape || "";
+      document.getElementById("f-retest").value = t.retestQuality || "";
+      document.getElementById("f-timewin").value = t.timeWindow || "";
+      document.getElementById("f-exitt1").value = t.exitT1 || "";
+      document.getElementById("f-exitt2").value = t.exitT2 || "";
+    }
+  } else {
+    document.getElementById("modal-title").textContent = "Nový obchod";
+    document.getElementById("f-date").value = new Date().toISOString().slice(0, 10);
+    ["f-time","f-result","f-rrr","f-pot","f-thoughts","f-lesson","f-ss"].forEach(function(k) { document.getElementById(k).value = ""; });
+    document.getElementById("f-dir").value = "Long"; document.getElementById("f-sess").value = "London";
+    document.getElementById("f-sl").value = "yes"; document.getElementById("f-plan").value = "yes";
+    document.getElementById("f-daytype").value = ""; document.getElementById("f-opentype").value = "";
+    document.getElementById("f-phase").value = ""; document.getElementById("f-mistake").value = "none";
+    document.getElementById("f-execq").value = 3; document.getElementById("sv-eq").textContent = 3;
+    document.getElementById("f-ibadr").value = ""; document.getElementById("f-ibshape").value = "";
+    document.getElementById("f-retest").value = ""; document.getElementById("f-timewin").value = "";
+    document.getElementById("f-exitt1").value = ""; document.getElementById("f-exitt2").value = "";
+    ["disc","calm","conf","emot"].forEach(function(k) {
+      var map = { disc: ["p-disc","sv-d"], calm: ["p-calm","sv-c"], conf: ["p-conf","sv-cf"], emot: ["p-emot","sv-e"] };
+      document.getElementById(map[k][0]).value = 3; document.getElementById(map[k][1]).textContent = 3;
+    });
+  }
+  modal.classList.add("open");
+}
+function closeModal() { document.getElementById("tradeModal").classList.remove("open"); }
+function saveTrade() {
+  var result = parseFloat(document.getElementById("f-result").value);
+  if (isNaN(result)) { alert("Zadej vysledek"); return; }
+  var t = {
+    id: editId || Date.now().toString(),
+    date: document.getElementById("f-date").value,
+    time: document.getElementById("f-time").value,
+    direction: document.getElementById("f-dir").value,
+    session: document.getElementById("f-sess").value,
+    setup: document.getElementById("f-setup").value,
+    result: result,
+    rrr: parseFloat(document.getElementById("f-rrr").value) || 0,
+    potential: parseFloat(document.getElementById("f-pot").value) || null,
+    sl: document.getElementById("f-sl").value,
+    plan: document.getElementById("f-plan").value,
+    discipline: +document.getElementById("p-disc").value,
+    calm: +document.getElementById("p-calm").value,
+    confidence: +document.getElementById("p-conf").value,
+    emotion: +document.getElementById("p-emot").value,
+    dayType: document.getElementById("f-daytype").value,
+    openType: document.getElementById("f-opentype").value,
+    phase: document.getElementById("f-phase").value,
+    execQuality: +document.getElementById("f-execq").value,
+    mistakeType: document.getElementById("f-mistake").value,
+    ibAdrRatio: parseFloat(document.getElementById("f-ibadr").value) || null,
+    ibShape: document.getElementById("f-ibshape").value,
+    retestQuality: document.getElementById("f-retest").value,
+    timeWindow: document.getElementById("f-timewin").value,
+    exitT1: document.getElementById("f-exitt1").value,
+    exitT2: document.getElementById("f-exitt2").value,
+    thoughts: document.getElementById("f-thoughts").value,
+    lesson: document.getElementById("f-lesson").value,
+    screenshot: document.getElementById("f-ss").value
+  };
+  if (editId) { trades[trades.findIndex(function(x) { return x.id === editId; })] = t; }
+  else { trades.push(t); }
+  trades.sort(function(a, b) { return a.date.localeCompare(b.date); });
+  save(); closeModal(); renderDash(); renderTrades();
+}
+function deleteTrade(id) {
+  if (!confirm("Smazat?")) return;
+  trades = trades.filter(function(x) { return x.id !== id; });
+  save(); renderDash(); renderTrades();
+}
+
+// Day modal
+function openDayModal() {
+  document.getElementById("d-date").value = new Date().toISOString().slice(0, 10);
+  ["d-good","d-bad","d-sum"].forEach(function(id) { document.getElementById(id).value = ""; });
+  document.getElementById("d-mood").value = 3; document.getElementById("sv-mood").textContent = 3;
+  document.getElementById("dayModal").classList.add("open");
+}
+function closeDayModal() { document.getElementById("dayModal").classList.remove("open"); }
+function saveDaySum() {
+  days.push({ id: Date.now().toString(), date: document.getElementById("d-date").value, good: document.getElementById("d-good").value, bad: document.getElementById("d-bad").value, summary: document.getElementById("d-sum").value, mood: +document.getElementById("d-mood").value });
+  days.sort(function(a, b) { return b.date.localeCompare(a.date); });
+  save(); closeDayModal(); renderDayLog();
+}
+
+// Settings
+function openSettings() { document.getElementById("settingsModal").classList.add("open"); renderAccountsList(); renderSetupsList(); }
+function closeSettings() { document.getElementById("settingsModal").classList.remove("open"); }
+function exportData() {
+  var b = new Blob([JSON.stringify({ accounts: accounts, activeAcc: activeAcc, setups: setups, playbooks: playbooks }, null, 2)], { type: "application/json" });
+  var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "tradelog-" + new Date().toISOString().slice(0, 10) + ".json"; a.click();
+}
+function importData(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    try {
+      var d = JSON.parse(ev.target.result); if (!confirm("Importovat?")) return;
+      if (d.accounts) accounts = d.accounts;
+      if (d.activeAcc) activeAcc = d.activeAcc;
+      if (d.setups) setups = d.setups;
+      if (d.playbooks) playbooks = d.playbooks;
+      saveAccounts(); saveSetups(); savePlaybooks(); localStorage.setItem("tj_active_acc", activeAcc);
+      loadData(); renderDash(); renderTrades(); updateAccSel(); updateSetupSels(); alert("OK!");
+    } catch(err) { alert("Chyba importu"); }
+  };
+  r.readAsText(f);
+}
+function deleteAll() { if (!confirm("Smazat?")) return; trades = []; days = []; save(); renderDash(); renderTrades(); closeSettings(); }
+
+// MC card helper
+function mcCard(l, v, sub, color, glow) {
+  return '<div class="mc"><div class="mcg" style="background:' + glow + ';"></div><div class="mcl">' + l + '</div><div class="mcv" style="color:' + color + ';">' + v + '</div>' + (sub ? '<div class="mcs">' + sub + '</div>' : '') + '</div>';
+}
+
+// DASHBOARD
+function renderDash() {
+  var acObj = accounts.find(function(a){ return a.id === activeAcc; });
+  var TARGET = acObj && acObj.target ? acObj.target : 3000;
+  var tb = document.getElementById("target-bar");
+  var mg = document.getElementById("metrics");
+  var re = document.getElementById("recent-empty");
+  var rb = document.getElementById("recent-tbody");
+  if (!trades.length) {
+    if (tb) tb.innerHTML = '<div class="tbtop"><span class="tblbl">Challenge Target $' + TARGET + '</span></div><div class="tbtrack"><div class="tbfill" style="width:0%"></div></div>';
+    if (mg) mg.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="eic">📊</div><p>Přidej první obchod</p></div>';
+    ["eqChart","wlChart","setupChart","sesChart","hourChart","potChart"].forEach(dc);
+    if (re) re.style.display = "block"; if (rb) rb.innerHTML = ""; return;
+  }
+  var wins = trades.filter(function(t) { return t.result > 0; });
+  var losses = trades.filter(function(t) { return t.result < 0; });
+  var be = trades.filter(function(t) { return t.result === 0; });
+  var pnl = trades.reduce(function(s, t) { return s + t.result; }, 0);
+  var wr = (wins.length / trades.length * 100).toFixed(1);
+  var rArr = trades.filter(function(t) { return t.rrr; });
+  var avgR = rArr.length ? (rArr.reduce(function(s, t) { return s + t.rrr; }, 0) / rArr.length).toFixed(2) : "-";
+  var avgW = wins.length ? wins.reduce(function(s, t) { return s + t.result; }, 0) / wins.length : 0;
+  var avgL = losses.length ? losses.reduce(function(s, t) { return s + t.result; }, 0) / losses.length : 0;
+  var pf = (losses.length && Math.abs(avgL * losses.length) > 0) ? (avgW * wins.length / Math.abs(avgL * losses.length)).toFixed(2) : "inf";
+  var peak = 0; var maxDD = 0; var runPnl = 0;
+  trades.forEach(function(t) { runPnl += t.result; if (runPnl > peak) peak = runPnl; var dd = peak - runPnl; if (dd > maxDD) maxDD = dd; });
+  var tPct = Math.min(100, Math.round(Math.max(0, pnl) / TARGET * 100));
+  if (tb) tb.innerHTML = '<div class="tbtop"><span class="tblbl">Challenge Target $' + TARGET + '</span><span style="font-family:var(--mo);font-size:12px;font-weight:700;">' + tPct + '% · zbyva $' + Math.max(0, TARGET - pnl).toFixed(0) + '</span></div><div class="tbtrack"><div class="tbfill" style="width:' + tPct + '%"></div></div>';
+  if (mg) mg.innerHTML =
+    mcCard("Celkovy P&L", fm(pnl), "", pnl >= 0 ? "var(--gr)" : "var(--rd)", "linear-gradient(90deg," + (pnl >= 0 ? "var(--gr)" : "var(--rd)") + ",transparent)") +
+    mcCard("Win Rate", wr + "%", wins.length + "W/" + losses.length + "L", "var(--yw)", "linear-gradient(90deg,var(--yw),transparent)") +
+    mcCard("Profit Factor", pf, "", "var(--ac2)", "linear-gradient(90deg,var(--ac),transparent)") +
+    mcCard("Avg RRR", avgR, "", "var(--cy)", "linear-gradient(90deg,var(--cy),transparent)") +
+    mcCard("Max Drawdown", "-" + maxDD.toFixed(2) + " $", "", "var(--rd)", "linear-gradient(90deg,var(--rd),transparent)");
+  dc("eqChart");
+  var run = 0; var eqD = trades.map(function(t) { run += t.result; return run; });
+  var ctx1 = document.getElementById("eqChart").getContext("2d");
+  var g1 = ctx1.createLinearGradient(0, 0, 0, 180); g1.addColorStop(0, "rgba(99,102,241,0.3)"); g1.addColorStop(1, "rgba(99,102,241,0)");
+  CH["eqChart"] = new Chart(ctx1, { type: "line", data: { labels: trades.map(function(t) { return fd(t.date); }), datasets: [{ data: eqD, borderColor: "#6366f1", backgroundColor: g1, borderWidth: 2.5, pointRadius: 3, fill: true, tension: 0.35 }] }, options: mkOpts() });
+  dc("wlChart");
+  CH["wlChart"] = new Chart(document.getElementById("wlChart").getContext("2d"), { type: "doughnut", data: { labels: ["W","L","BE"], datasets: [{ data: [wins.length, losses.length, be.length], backgroundColor: ["#10b981","#ef4444","#f59e0b"], borderWidth: 0 }] }, options: { plugins: { legend: { labels: { color: "#64748b", font: { family: "JetBrains Mono", size: 10 } } } }, cutout: "62%" } });
+  dc("setupChart");
+  var sPnl = setups.map(function(s) { return trades.filter(function(t) { return t.setup === s; }).reduce(function(sm, t) { return sm + t.result; }, 0); });
+  CH["setupChart"] = new Chart(document.getElementById("setupChart").getContext("2d"), { type: "bar", data: { labels: setups.map(function(s) { return s.length > 12 ? s.slice(0, 12) + "..." : s; }), datasets: [{ data: sPnl, backgroundColor: sPnl.map(function(v) { return v >= 0 ? "rgba(16,185,129,.75)" : "rgba(239,68,68,.75)"; }), borderRadius: 5 }] }, options: mkOpts() });
+  dc("sesChart");
+  var sesPnl = ["London","New York"].map(function(s) { return trades.filter(function(t) { return t.session === s; }).reduce(function(sm, t) { return sm + t.result; }, 0); });
+  CH["sesChart"] = new Chart(document.getElementById("sesChart").getContext("2d"), { type: "bar", data: { labels: ["London","New York"], datasets: [{ data: sesPnl, backgroundColor: sesPnl.map(function(v) { return v >= 0 ? "rgba(16,185,129,.75)" : "rgba(239,68,68,.75)"; }), borderRadius: 5 }] }, options: mkOpts() });
+  dc("hourChart");
+  var hPnl = Array(24).fill(0); trades.forEach(function(t) { if (t.time) hPnl[+t.time.split(":")[0]] += t.result; });
+  var ah = hPnl.map(function(v, i) { return { h: i, v: v }; }).filter(function(x) { return x.v !== 0; });
+  CH["hourChart"] = new Chart(document.getElementById("hourChart").getContext("2d"), { type: "bar", data: { labels: ah.map(function(x) { return x.h + ":00"; }), datasets: [{ data: ah.map(function(x) { return x.v; }), backgroundColor: ah.map(function(x) { return x.v >= 0 ? "rgba(16,185,129,.75)" : "rgba(239,68,68,.75)"; }), borderRadius: 5 }] }, options: mkOpts() });
+  dc("potChart");
+  var wp = trades.filter(function(t) { return t.potential && t.rrr; });
+  var potOpts = mkLegOpts();
+  CH["potChart"] = new Chart(document.getElementById("potChart").getContext("2d"), { type: "bar", data: { labels: wp.map(function(t) { return fd(t.date); }), datasets: [{ label: "Dosazeno", data: wp.map(function(t) { return t.rrr; }), backgroundColor: "rgba(99,102,241,.75)", borderRadius: 4 }, { label: "Potencial", data: wp.map(function(t) { return t.potential; }), backgroundColor: "rgba(245,158,11,.25)", borderRadius: 4 }] }, options: potOpts });
+  var recent = trades.slice().reverse().slice(0, 8);
+  if (re) re.style.display = recent.length ? "none" : "block";
+  if (rb) rb.innerHTML = recent.map(function(t) {
+    return "<tr><td>" + fd(t.date) + "</td><td>" + (t.time||"") + "</td><td><span class='bdg " + (t.direction==="Long"?"blong":"bshort") + "'>" + t.direction + "</span></td><td style='font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>" + t.setup + "</td><td><span class='bdg " + (t.session==="London"?"blon":"bny") + "'>" + t.session + "</span></td><td class='" + (t.result>0?"pos":t.result<0?"neg":"neu") + "'>" + fm(t.result) + "</td><td>" + (t.rrr?t.rrr+"R":"-") + "</td><td>" + (t.plan==="yes"?"✅":t.plan==="partial"?"⚡":"❌") + "</td><td>" + (t.screenshot?"<a href='" + t.screenshot + "' target='_blank' style='color:var(--ac2);'>📸</a>":"-") + "</td></tr>";
+  }).join("");
+}
+
+// CALENDAR
+function changeCalMonth(d) { calMonth += d; if (calMonth < 0) { calMonth = 11; calYear--; } if (calMonth > 11) { calMonth = 0; calYear++; } renderCal(); }
+function renderCal() {
+  document.getElementById("cal-title").textContent = MNS[calMonth] + " " + calYear;
+  var mt = trades.filter(function(t) { var d = new Date(t.date + "T12:00:00"); return d.getFullYear() === calYear && d.getMonth() === calMonth; });
+  var mPnl = mt.reduce(function(s, t) { return s + t.result; }, 0);
+  var mW = mt.filter(function(t) { return t.result > 0; }).length;
+  var mL = mt.filter(function(t) { return t.result < 0; }).length;
+  var cs = document.getElementById("cal-month-stats");
+  if (cs) cs.innerHTML = mcCard("Mesicni P&L", fm(mPnl), "", mPnl>=0?"var(--gr)":"var(--rd)", "linear-gradient(90deg,"+(mPnl>=0?"var(--gr)":"var(--rd)")+",transparent)") + mcCard("Win Rate", mt.length?(mW/mt.length*100).toFixed(1)+"%":"0%", mW+"W/"+mL+"L", "var(--yw)", "linear-gradient(90deg,var(--yw),transparent)") + mcCard("Obchodu", mt.length, "", "var(--cy)", "linear-gradient(90deg,var(--cy),transparent)");
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var dim = new Date(calYear, calMonth + 1, 0).getDate();
+  var off = firstDay === 0 ? 6 : firstDay - 1;
+  var today = new Date();
+  var byDay = {};
+  mt.forEach(function(t) { var d = parseInt(t.date.split("-")[2]); if (!byDay[d]) byDay[d] = []; byDay[d].push(t); });
+  var h = '<div class="cdn">Po</div><div class="cdn">Ut</div><div class="cdn">St</div><div class="cdn">Ct</div><div class="cdn">Pa</div><div class="cdn">So</div><div class="cdn">Ne</div>';
+  for (var i = 0; i < off; i++) h += '<div class="cd empty"></div>';
+  for (var d2 = 1; d2 <= dim; d2++) {
+    var ts = byDay[d2] || [];
+    var dp = ts.reduce(function(s, t) { return s + t.result; }, 0);
+    var isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d2;
+    var cls = "cd " + (!ts.length?"notrade":dp>0?"cwin":dp<0?"closs":"cbe") + (isToday?" today":"");
+    h += '<div class="' + cls + '"><div style="font-size:11px;font-weight:700;">' + d2 + '</div>' + (ts.length?'<div style="font-size:8px;">' + (dp>0?"+":"") + dp.toFixed(0) + '</div>':"") + '</div>';
+  }
+  document.getElementById("cal-grid").innerHTML = h;
+  var ct = document.getElementById("cal-trades-title"); var cb = document.getElementById("cal-tbody"); var ce = document.getElementById("cal-empty");
+  if (ct) ct.textContent = "Obchody - " + MNS[calMonth] + " (" + mt.length + ")";
+  if (!mt.length) { if (cb) cb.innerHTML = ""; if (ce) ce.style.display = "block"; }
+  else {
+    if (ce) ce.style.display = "none";
+    if (cb) cb.innerHTML = mt.slice().reverse().map(function(t) {
+      return "<tr><td>" + fd(t.date) + "</td><td>" + (t.time||"") + "</td><td><span class='bdg " + (t.direction==="Long"?"blong":"bshort") + "'>" + t.direction + "</span></td><td style='font-size:11px;'>" + t.setup + "</td><td><span class='bdg " + (t.session==="London"?"blon":"bny") + "'>" + t.session + "</span></td><td class='" + (t.result>0?"pos":t.result<0?"neg":"neu") + "'>" + fm(t.result) + "</td><td>" + (t.rrr?t.rrr+"R":"-") + "</td><td>" + (t.plan==="yes"?"✅":t.plan==="partial"?"⚡":"❌") + "</td></tr>";
+    }).join("");
+  }
+}
+
+// TRADES
+function renderTrades() {
+  var fsEl=document.getElementById("fSession"); var fsetEl=document.getElementById("fSetup");
+  var fdEl=document.getElementById("fDir"); var frEl=document.getElementById("fResult");
+  var fs=fsEl?fsEl.value:""; var fset=fsetEl?fsetEl.value:""; var fd2=fdEl?fdEl.value:""; var fr=frEl?frEl.value:"";
+  var fl = trades.filter(function(t) { return (!fs||t.session===fs)&&(!fset||t.setup===fset)&&(!fd2||t.direction===fd2)&&(!fr||(fr==="win"?t.result>0:t.result<0)); }).slice().reverse();
+  var tb=document.getElementById("trades-tbody"); var em=document.getElementById("trades-empty"); var cnt=document.getElementById("trades-count");
+  if (cnt) cnt.textContent = fl.length + " zaznamu";
+  if (!fl.length) { if (tb) tb.innerHTML = ""; if (em) em.style.display = "block"; return; }
+  if (em) em.style.display = "none";
+  if (tb) tb.innerHTML = fl.map(function(t) {
+    return "<tr><td>" + fd(t.date) + "</td><td>" + (t.time||"") + "</td><td><span class='bdg " + (t.direction==="Long"?"blong":"bshort") + "'>" + t.direction + "</span></td><td style='font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>" + t.setup + "</td><td><span class='bdg " + (t.session==="London"?"blon":"bny") + "'>" + t.session + "</span></td><td class='" + (t.result>0?"pos":t.result<0?"neg":"neu") + "'>" + fm(t.result) + "</td><td>" + (t.rrr?t.rrr+"R":"-") + "</td><td>" + (t.potential?"<span style='color:var(--yw);'>"+t.potential+"R</span>":"-") + "</td><td>" + (t.plan==="yes"?"✅":t.plan==="partial"?"⚡":"❌") + "</td><td>" + (t.screenshot?"<a href='"+t.screenshot+"' target='_blank' style='color:var(--ac2);'>📸</a>":"-") + "</td><td><div style='display:flex;gap:4px;'><button class='abtn' onclick=\"openModal('"+t.id+"')\">E</button><button class='abtn del' onclick=\"deleteTrade('"+t.id+"')\">X</button></div></td></tr>";
+  }).join("");
+}
+
+// REPORTS
+function renderReports() {
+  if (!trades.length) { document.getElementById("report-metrics").innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="eic">📊</div><p>Žádné obchody</p></div>'; return; }
+  var wins=trades.filter(function(t){return t.result>0;}); var losses=trades.filter(function(t){return t.result<0;});
+  var avgW=wins.length?wins.reduce(function(s,t){return s+t.result;},0)/wins.length:0;
+  var avgL=losses.length?losses.reduce(function(s,t){return s+t.result;},0)/losses.length:0;
+  var pf=(losses.length&&Math.abs(avgL*losses.length)>0)?(avgW*wins.length/Math.abs(avgL*losses.length)).toFixed(2):"inf";
+  var peak=0;var maxDD=0;var runPnl=0;var cW=0;var cL=0;var maxW=0;var maxL=0;
+  trades.forEach(function(t){runPnl+=t.result;if(runPnl>peak)peak=runPnl;var dd=peak-runPnl;if(dd>maxDD)maxDD=dd;if(t.result>0){cW++;cL=0;if(cW>maxW)maxW=cW;}else if(t.result<0){cL++;cW=0;if(cL>maxL)maxL=cL;}});
+  document.getElementById("report-metrics").innerHTML =
+    mcCard("Profit Factor",pf,"","var(--ac2)","linear-gradient(90deg,var(--ac),transparent)") +
+    mcCard("Avg Win","+"+avgW.toFixed(2)+" $","","var(--gr)","linear-gradient(90deg,var(--gr),transparent)") +
+    mcCard("Avg Loss",avgL.toFixed(2)+" $","","var(--rd)","linear-gradient(90deg,var(--rd),transparent)") +
+    mcCard("Max Drawdown","-"+maxDD.toFixed(2)+" $","","var(--rd)","linear-gradient(90deg,var(--rd),transparent)");
+  // Expectancy
+  var wr2=wins.length/trades.length; var lr2=losses.length/trades.length;
+  var exp=((wr2*avgW)+(lr2*avgL)).toFixed(2);
+  var rArr=trades.filter(function(t){return t.rrr;}); var avgRRR=rArr.length?rArr.reduce(function(s,t){return s+t.rrr;},0)/rArr.length:0;
+  var expR=rArr.length?((wr2*avgRRR)+(lr2*-1)).toFixed(2):"-";
+  var ec=parseFloat(exp)>=0?"var(--gr)":"var(--rd)";
+  var expEl=document.getElementById("exp-content");
+  if(expEl)expEl.innerHTML='<div style="display:flex;flex-direction:column;gap:10px;">'
+    +'<div style="padding:10px 14px;background:var(--sf2);border-radius:8px;"><div style="font-size:11px;color:var(--tx3);margin-bottom:3px;">Expectancy ($)</div><div style="font-size:22px;font-weight:800;font-family:var(--mo);color:'+ec+';">'+(parseFloat(exp)>=0?"+":"")+exp+' $</div></div>'
+    +'<div style="padding:10px 14px;background:var(--sf2);border-radius:8px;"><div style="font-size:11px;color:var(--tx3);margin-bottom:3px;">Expectancy (R)</div><div style="font-size:20px;font-weight:800;font-family:var(--mo);color:'+(parseFloat(expR)>=0?"var(--gr)":"var(--rd)")+';">'+expR+' R</div></div>'
+    +'<div style="padding:10px;background:var(--adim);border-radius:8px;font-size:12px;color:var(--tx3);">'+(parseFloat(exp)>0?"Pozitivní expectancy = systém je profitabilní.":"Negativní expectancy = zlepš win rate nebo avg win.")+'</div></div>';
+  // Consistency
+  var res=trades.map(function(t){return t.result;});
+  var meanR=res.reduce(function(s,v){return s+v;},0)/res.length;
+  var vari=res.reduce(function(s,v){return s+Math.pow(v-meanR,2);},0)/res.length;
+  var stdD=Math.sqrt(vari);
+  var cv=meanR!==0?Math.abs(stdD/meanR*100).toFixed(0):"0";
+  var cScore=Math.max(0,Math.min(100,Math.round(100-Math.min(parseFloat(cv)||100,100))));
+  var cLbl=cScore>=75?"Vysoka":cScore>=50?"Stredni":"Nizka";
+  var withinSD=res.filter(function(v){return Math.abs(v-meanR)<=stdD;}).length;
+  var coEl=document.getElementById("cons-content");
+  if(coEl)coEl.innerHTML='<div style="display:flex;flex-direction:column;gap:10px;">'
+    +'<div style="padding:10px 14px;background:var(--sf2);border-radius:8px;"><div style="font-size:11px;color:var(--tx3);margin-bottom:3px;">Skore konzistence</div><div style="font-size:22px;font-weight:800;font-family:var(--mo);">'+cScore+'/100</div></div>'
+    +'<div style="padding:10px 14px;background:var(--sf2);border-radius:8px;display:flex;flex-direction:column;gap:6px;">'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--tx3);">Std. odchylka</span><span style="font-family:var(--mo);">'+stdD.toFixed(2)+' $</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--tx3);">Koef. variace</span><span style="font-family:var(--mo);">'+cv+'%</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--tx3);">V ±1 sigma</span><span style="font-family:var(--mo);color:var(--ac2);">'+Math.round(withinSD/res.length*100)+'%</span></div></div></div>';
+  var pnlT=trades.reduce(function(s,t){return s+t.result;},0);
+  document.getElementById("drawdown-content").innerHTML='<div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;justify-content:space-between;"><span style="color:var(--tx3);font-size:12px;">Max drawdown</span><span style="font-family:var(--mo);font-weight:700;color:var(--rd);">-'+maxDD.toFixed(2)+' $</span></div><div style="height:8px;background:var(--sf3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:'+(pnlT+maxDD>0?Math.min(100,maxDD/(pnlT+maxDD)*100).toFixed(1):0)+'%;background:var(--rd);border-radius:4px;"></div></div></div>';
+  document.getElementById("streak-content").innerHTML='<div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;justify-content:space-between;"><span style="color:var(--tx3);font-size:12px;">Max serie vyher</span><span style="font-family:var(--mo);font-weight:700;color:var(--gr);">'+maxW+'x</span></div><div style="display:flex;justify-content:space-between;"><span style="color:var(--tx3);font-size:12px;">Max serie ztrat</span><span style="font-family:var(--mo);font-weight:700;color:var(--rd);">'+maxL+'x</span></div></div>';
+  dc("weekdayChart");
+  var DAYS=["Po","Út","St","Čt","Pá","So","Ne"];
+  var wdP=Array(7).fill(0); trades.forEach(function(t){var d=new Date(t.date+"T12:00:00");var dow=d.getDay()===0?6:d.getDay()-1;wdP[dow]+=t.result;});
+  CH["weekdayChart"]=new Chart(document.getElementById("weekdayChart").getContext("2d"),{type:"bar",data:{labels:DAYS,datasets:[{data:wdP,backgroundColor:wdP.map(function(v){return v>=0?"rgba(16,185,129,.75)":"rgba(239,68,68,.75)";}),borderRadius:5}]},options:mkOpts()});
+  dc("hourChart2");
+  var hP2=Array(24).fill(0); trades.forEach(function(t){if(t.time)hP2[+t.time.split(":")[0]]+=t.result;});
+  var ah2=hP2.map(function(v,i){return{h:i,v:v};}).filter(function(x){return x.v!==0;});
+  CH["hourChart2"]=new Chart(document.getElementById("hourChart2").getContext("2d"),{type:"bar",data:{labels:ah2.map(function(x){return x.h+":00";}),datasets:[{data:ah2.map(function(x){return x.v;}),backgroundColor:ah2.map(function(x){return x.v>=0?"rgba(16,185,129,.75)":"rgba(239,68,68,.75)";}),borderRadius:5}]},options:mkOpts()});
+  dc("cumChart");
+  var cum=0; var cumD=trades.map(function(t){cum+=t.result;return cum;});
+  var ctx2=document.getElementById("cumChart").getContext("2d");
+  var g2=ctx2.createLinearGradient(0,0,0,200); g2.addColorStop(0,"rgba(99,102,241,0.3)"); g2.addColorStop(1,"rgba(99,102,241,0)");
+  CH["cumChart"]=new Chart(ctx2,{type:"line",data:{labels:trades.map(function(t,i){return "#"+(i+1);}),datasets:[{data:cumD,borderColor:"#6366f1",backgroundColor:g2,borderWidth:2,pointRadius:0,fill:true,tension:0.3}]},options:mkOpts()});
+  dc("distChart");
+  var dRes=trades.map(function(t){return t.result;}).sort(function(a,b){return a-b;});
+  CH["distChart"]=new Chart(document.getElementById("distChart").getContext("2d"),{type:"bar",data:{labels:dRes.map(function(v,i){return "#"+(i+1);}),datasets:[{data:dRes,backgroundColor:dRes.map(function(v){return v>=0?"rgba(16,185,129,.75)":"rgba(239,68,68,.75)";}),borderRadius:3}]},options:mkOpts()});
+  var sd=setups.map(function(s){var st=trades.filter(function(t){return t.setup===s;});if(!st.length)return null;var p=st.filter(function(t){return t.result>0;});var sp=st.reduce(function(s2,t){return s2+t.result;},0);var wr3=p.length?(p.length/st.length*100).toFixed(0):0;var rr=st.filter(function(t){return t.rrr;});var ar=rr.length?(rr.reduce(function(s2,t){return s2+t.rrr;},0)/rr.length).toFixed(2):"-";return{s:s,n:st.length,wr:wr3,sp:sp,ar:ar};}).filter(Boolean);
+  document.getElementById("setup-detail").innerHTML='<table><thead><tr><th>Setup</th><th>N</th><th>WR</th><th>RRR</th><th>P&L</th></tr></thead><tbody>'+sd.map(function(x){return "<tr><td style='font-size:12px;'>"+x.s+"</td><td>"+x.n+"</td><td style='color:var(--yw);'>"+x.wr+"%</td><td>"+x.ar+"</td><td class='"+(x.sp>=0?"pos":"neg")+"'>"+fm(x.sp)+"</td></tr>";}).join("")+"</tbody></table>";
+}
+
+// PLAYBOOK
+function openPbForm(id){
+  if(id===undefined)id=null; editPbId=id;
+  if(id){var pb=playbooks.find(function(x){return x.id===id;});document.getElementById("pb-form-title").textContent="Upravit";document.getElementById("pb-name").value=pb.name;document.getElementById("pb-desc").value=pb.desc||"";document.getElementById("pb-exit").value=pb.exit||"";document.getElementById("pb-risk").value=pb.risk||"";}
+  else{document.getElementById("pb-form-title").textContent="Nový setup";["pb-name","pb-desc","pb-exit","pb-risk"].forEach(function(id2){document.getElementById(id2).value="";});}
+  document.getElementById("pb-form").style.display="block";
+}
+function closePbForm(){document.getElementById("pb-form").style.display="none";editPbId=null;}
+function savePb(){
+  var name=document.getElementById("pb-name").value.trim();if(!name)return;
+  var pb={id:editPbId||Date.now().toString(),name:name,desc:document.getElementById("pb-desc").value,exit:document.getElementById("pb-exit").value,risk:document.getElementById("pb-risk").value};
+  if(editPbId){playbooks[playbooks.findIndex(function(x){return x.id===editPbId;})]=pb;}else{playbooks.push(pb);if(setups.indexOf(name)<0){setups.push(name);saveSetups();}}
+  savePlaybooks();closePbForm();renderPb();updateSetupSels();
+}
+function deletePb(id){if(!confirm("Smazat?"))return;playbooks=playbooks.filter(function(x){return x.id!==id;});savePlaybooks();renderPb();}
+function renderPb(){
+  var el=document.getElementById("playbook-list");var em=document.getElementById("playbook-empty");
+  if(!playbooks.length){el.innerHTML="";em.style.display="block";return;}em.style.display="none";
+  el.innerHTML=playbooks.map(function(pb){
+    var st=trades.filter(function(t){return t.setup===pb.name;});
+    var sp=st.reduce(function(s,t){return s+t.result;},0);
+    var wr4=st.length?(st.filter(function(t){return t.result>0;}).length/st.length*100).toFixed(0):"-";
+    return '<div class="pbcard"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:14px;font-weight:700;">'+pb.name+'</div>'+(pb.desc?'<div style="font-size:12px;color:var(--tx3);margin-top:4px;">'+pb.desc.slice(0,100)+'</div>':"")+'</div><div style="display:flex;gap:6px;"><button onclick="openPbForm(\''+pb.id+'\')" class="btns" style="font-size:11px;padding:4px 9px;">E</button><button onclick="deletePb(\''+pb.id+'\')" class="btnd" style="font-size:11px;padding:4px 9px;">X</button></div></div>'
+      +(st.length?'<div style="display:flex;gap:16px;"><div><div style="font-size:9px;color:var(--tx3);">N</div><div style="font-size:14px;font-weight:700;">'+st.length+'</div></div><div><div style="font-size:9px;color:var(--tx3);">WR</div><div style="font-size:14px;font-weight:700;color:var(--yw);">'+wr4+'%</div></div><div><div style="font-size:9px;color:var(--tx3);">P&L</div><div style="font-size:14px;font-weight:700;color:'+(sp>=0?"var(--gr)":"var(--rd)")+';">'+fm(sp)+'</div></div></div>':'<div style="font-size:11px;color:var(--tx3);">Zatim zadne obchody</div>')+'</div>';
+  }).join("");
+}
+
+// PSYCHOLOGY
+function renderPsych(){
+  var el=document.getElementById("psych-metrics");var pl=document.getElementById("psych-list");
+  if(!trades.length){if(el)el.innerHTML='<div class="empty" style="grid-column:1/-1;"><div class="eic">🧠</div><p>Žádné záznamy</p></div>';if(pl)pl.innerHTML="";return;}
+  function avg(k){return(trades.reduce(function(s,t){return s+(t[k]||0);},0)/trades.length).toFixed(1);}
+  if(el)el.innerHTML=mcCard("Avg Disciplina",avg("discipline")+"/5","","var(--ac2)","linear-gradient(90deg,var(--ac),transparent)")+mcCard("Avg Klid",avg("calm")+"/5","","var(--cy)","linear-gradient(90deg,var(--cy),transparent)")+mcCard("Avg Duvera",avg("confidence")+"/5","","var(--yw)","linear-gradient(90deg,var(--yw),transparent)")+mcCard("Plan",(trades.filter(function(t){return t.plan==="yes";}).length/trades.length*100).toFixed(0)+"%","","var(--gr)","linear-gradient(90deg,var(--gr),transparent)");
+  dc("psychChart");
+  var s2=trades.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  var psychOpts2={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:"#64748b",font:{family:"JetBrains Mono",size:10}}}},scales:{x:{ticks:{color:"#64748b",font:{family:"JetBrains Mono",size:10}},grid:{color:"rgba(30,45,69,.4)"}},y:{min:1,max:5,ticks:{color:"#64748b",font:{family:"JetBrains Mono",size:10}},grid:{color:"rgba(30,45,69,.4)"}}}};
+  CH["psychChart"]=new Chart(document.getElementById("psychChart").getContext("2d"),{type:"line",data:{labels:s2.map(function(t){return fd(t.date);}),datasets:[{label:"Disciplína",data:s2.map(function(t){return t.discipline;}),borderColor:"#6366f1",borderWidth:2,pointRadius:2,tension:0.3},{label:"Klid",data:s2.map(function(t){return t.calm;}),borderColor:"#06b6d4",borderWidth:2,pointRadius:2,tension:0.3},{label:"Duvera",data:s2.map(function(t){return t.confidence;}),borderColor:"#f59e0b",borderWidth:2,pointRadius:2,tension:0.3}]},options:psychOpts2});
+  dc("emotChart");
+  var emotOpts={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{min:1,max:5,ticks:{color:"#64748b",font:{family:"JetBrains Mono",size:10}},grid:{color:"rgba(30,45,69,.4)"}},y:{ticks:{color:"#64748b",font:{family:"JetBrains Mono",size:10}},grid:{color:"rgba(30,45,69,.4)"}}}};
+  CH["emotChart"]=new Chart(document.getElementById("emotChart").getContext("2d"),{type:"scatter",data:{datasets:[{data:trades.map(function(t){return{x:t.emotion,y:t.result};}),backgroundColor:trades.map(function(t){return t.result>=0?"rgba(16,185,129,.7)":"rgba(239,68,68,.7)";}),pointRadius:6}]},options:emotOpts});
+  if(pl)pl.innerHTML=trades.slice().reverse().map(function(t){return'<div style="padding:14px 16px;border-bottom:1px solid var(--bd);"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:var(--mo);font-size:12px;color:var(--ac2);">'+fd(t.date)+'</span><span class="'+(t.result>=0?"pos":"neg")+'">'+fm(t.result)+'</span></div><div style="font-size:12px;color:var(--tx2);">Disc:'+t.discipline+' Klid:'+t.calm+' Duvera:'+t.confidence+' Plan:'+(t.plan==="yes"?"✅":"❌")+'</div>'+(t.thoughts?'<div style="margin-top:5px;font-size:12px;color:var(--tx3);">'+t.thoughts+'</div>':"")+'</div>';}).join("");
+}
+
+// SUMMARY
+function getWk(){var n=new Date();var d=n.getDay()===0?6:n.getDay()-1;var m=new Date(n);m.setDate(n.getDate()-d);return"w_"+m.toISOString().slice(0,10);}
+function getMk(){var n=new Date();return"m_"+n.getFullYear()+"-"+(n.getMonth()+1);}
+function saveSumNotes(){localStorage.setItem("sum_n_"+(sumMode==="week"?getWk():getMk()),document.getElementById("sum-notes").value);}
+var sumCharts={};
+function showSum(mode){
+  sumMode=mode;
+  var wb=document.getElementById("sw-btn");var mb=document.getElementById("sm-btn");
+  if(wb){wb.className=mode==="week"?"btnp":"btns";wb.style.fontSize="12px";wb.style.padding="7px 14px";}
+  if(mb){mb.className=mode==="month"?"btnp":"btns";mb.style.fontSize="12px";}
+  var now=new Date();var filtered;var label;
+  if(mode==="week"){
+    var dow=now.getDay()===0?6:now.getDay()-1;var mon=new Date(now);mon.setDate(now.getDate()-dow);mon.setHours(0,0,0,0);var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+    filtered=trades.filter(function(t){var d=new Date(t.date+"T12:00:00");return d>=mon&&d<=sun;});label="Týden "+fd(mon.toISOString().slice(0,10))+" - "+fd(sun.toISOString().slice(0,10));
+  }else{
+    var y=now.getFullYear();var m2=now.getMonth();
+    filtered=trades.filter(function(t){var d=new Date(t.date+"T12:00:00");return d.getFullYear()===y&&d.getMonth()===m2;});label=MNS[m2]+" "+y;
+  }
+  document.getElementById("sum-period").textContent=label;
+  document.getElementById("sum-trades-lbl").textContent="Obchody ("+filtered.length+")";
+  var w2=filtered.filter(function(t){return t.result>0;});var l2=filtered.filter(function(t){return t.result<0;});
+  var p2=filtered.reduce(function(s,t){return s+t.result;},0);
+  var wr5=filtered.length?(w2.length/filtered.length*100).toFixed(1):0;
+  var rA2=filtered.filter(function(t){return t.rrr;});var aR2=rA2.length?(rA2.reduce(function(s,t){return s+t.rrr;},0)/rA2.length).toFixed(2):"-";
+  var pOk=filtered.filter(function(t){return t.plan==="yes";}).length;
+  document.getElementById("sum-metrics").innerHTML=mcCard("P&L",fm(p2),"",p2>=0?"var(--gr)":"var(--rd)","linear-gradient(90deg,"+(p2>=0?"var(--gr)":"var(--rd)")+",transparent)")+mcCard("Win Rate",wr5+"%",w2.length+"W/"+l2.length+"L","var(--yw)","linear-gradient(90deg,var(--yw),transparent)")+mcCard("Avg RRR",aR2,"","var(--ac2)","linear-gradient(90deg,var(--ac),transparent)")+mcCard("Plan",pOk+"/"+filtered.length,"","var(--cy)","linear-gradient(90deg,var(--cy),transparent)");
+  if(sumCharts.eq)sumCharts.eq.destroy();if(sumCharts.wl)sumCharts.wl.destroy();
+  var s3=filtered.slice().sort(function(a,b){return a.date.localeCompare(b.date);});var run2=0;var eqD2=s3.map(function(t){run2+=t.result;return run2;});
+  var ctx3=document.getElementById("sumEqChart").getContext("2d");var g3=ctx3.createLinearGradient(0,0,0,180);g3.addColorStop(0,"rgba(99,102,241,0.3)");g3.addColorStop(1,"rgba(99,102,241,0)");
+  sumCharts.eq=new Chart(ctx3,{type:"line",data:{labels:s3.map(function(t){return fd(t.date);}),datasets:[{data:eqD2,borderColor:"#6366f1",backgroundColor:g3,borderWidth:2,pointRadius:4,fill:true,tension:0.35}]},options:mkOpts()});
+  sumCharts.wl=new Chart(document.getElementById("sumWlChart").getContext("2d"),{type:"doughnut",data:{labels:["W","L"],datasets:[{data:[w2.length,l2.length],backgroundColor:["#10b981","#ef4444"],borderWidth:0}]},options:{plugins:{legend:{labels:{color:"#64748b",font:{family:"JetBrains Mono",size:10}}}},cutout:"60%"}});
+  var tb2=document.getElementById("sum-tbody");var em2=document.getElementById("sum-empty");
+  if(!filtered.length){if(tb2)tb2.innerHTML="";if(em2)em2.style.display="block";}
+  else{if(em2)em2.style.display="none";if(tb2)tb2.innerHTML=filtered.slice().reverse().map(function(t){return"<tr><td>"+fd(t.date)+"</td><td><span class='bdg "+(t.direction==="Long"?"blong":"bshort")+"'>"+t.direction+"</span></td><td style='font-size:11px;'>"+t.setup+"</td><td><span class='bdg "+(t.session==="London"?"blon":"bny")+"'>"+t.session+"</span></td><td class='"+(t.result>0?"pos":t.result<0?"neg":"neu")+"'>"+fm(t.result)+"</td><td>"+(t.rrr?t.rrr+"R":"-")+"</td><td>"+(t.plan==="yes"?"✅":t.plan==="partial"?"⚡":"❌")+"</td></tr>";}).join("");}
+  document.getElementById("sum-notes").value=localStorage.getItem("sum_n_"+(mode==="week"?getWk():getMk()))||"";
+}
+
+// DAYLOG
+function renderDayLog(){
+  var el=document.getElementById("day-list");var em=document.getElementById("day-empty");
+  if(!days.length){if(el)el.innerHTML="";if(em)em.style.display="block";return;}if(em)em.style.display="none";
+  var me=["","😤","😕","😐","🙂","😊"];
+  if(el)el.innerHTML=days.map(function(d){return'<div style="padding:16px 18px;border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div><div style="font-family:var(--mo);font-size:12px;color:var(--ac2);font-weight:700;margin-bottom:8px;">'+fd(d.date)+" "+(me[d.mood]||"")+"</div>"+(d.good?'<div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">Co šlo dobře</div><div style="font-size:13px;margin-bottom:8px;">'+d.good+"</div>":"")+(d.bad?'<div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">Co zlepšit</div><div style="font-size:13px;">'+d.bad+"</div>":"")+"</div><div>"+(d.summary?'<div style="font-size:10px;color:var(--tx3);margin-bottom:3px;">Zaver</div><div style="font-size:13px;margin-bottom:10px;">'+d.summary+"</div>":"")+'<button onclick="delDay(\''+d.id+'\')" class="btnd" style="font-size:11px;padding:4px 10px;">Smazat</button></div></div>';}).join("");
+}
+function delDay(id){if(!confirm("Smazat?"))return;days=days.filter(function(x){return x.id!==id;});save();renderDayLog();}
+
+// MISTAKES
+var mCharts={};
+var ADVICE=["Před každým vstupem zopakuj pravidla setupu.","Nastav checklist před vstupem.","Po sérii ztrát dej pauzu.","Obchoduj jen setupy z Playbooku.","FOMO je signál k nevstoupení.","Zapiš kazde poruseni pravidel.","Nastav denní loss limit.","Nejlepší obchody přicházejí z trpělivosti."];
+function renderMistakes(){
+  var bad=trades.filter(function(t){return t.setup&&t.setup.indexOf("Mimo")>=0;});
+  var tL=bad.reduce(function(s,t){return s+t.result;},0);var aL=bad.length?(tL/bad.length).toFixed(2):0;
+  var mc2=document.getElementById("mistakes-metrics");
+  if(mc2)mc2.innerHTML=mcCard("Poruseni",bad.length,"","var(--rd)","linear-gradient(90deg,var(--rd),transparent)")+mcCard("Celkova ztrata",fm(tL),"",tL>=0?"var(--gr)":"var(--rd)","linear-gradient(90deg,"+(tL>=0?"var(--gr)":"var(--rd)")+",transparent)")+mcCard("Prumer",fm(parseFloat(aL)),"",parseFloat(aL)>=0?"var(--yw)":"var(--rd)","linear-gradient(90deg,var(--yw),transparent)")+mcCard("% obchodu",trades.length?(bad.length/trades.length*100).toFixed(1)+"%":"0%","","var(--yw)","linear-gradient(90deg,var(--yw),transparent)");
+  var alrt=document.getElementById("mistakes-alert");
+  if(alrt){if(bad.length>=3){alrt.style.display="block";alrt.textContent="Celkem "+bad.length+" poruseni. Průměrně tě stojí "+Math.abs(aL).toFixed(2)+" $ za poruseni. Drž Playbook.";}else alrt.style.display="none";}
+  var adv=document.getElementById("advice-list");
+  if(adv)adv.innerHTML=ADVICE.slice().sort(function(){return Math.random()-.5;}).slice(0,4).map(function(a,i){return'<div style="display:flex;gap:10px;margin-bottom:8px;"><span style="background:var(--adim);color:var(--ac2);font-size:11px;padding:2px 7px;border-radius:4px;font-family:var(--mo);">'+(i+1)+'</span><span style="font-size:13px;color:var(--tx2);">'+a+'</span></div>';}).join("");
+  if(mCharts.cum)mCharts.cum.destroy();if(mCharts.wd)mCharts.wd.destroy();
+  if(bad.length){
+    var bS=bad.slice().sort(function(a,b){return a.date.localeCompare(b.date);});var cB=0;var cD=bS.map(function(t){cB+=t.result;return cB;});
+    var ctxC=document.getElementById("mistakesCumChart").getContext("2d");
+    var gC=ctxC.createLinearGradient(0,0,0,200);gC.addColorStop(0,"rgba(239,68,68,0.3)");gC.addColorStop(1,"rgba(239,68,68,0)");
+    mCharts.cum=new Chart(ctxC,{type:"line",data:{labels:bS.map(function(t){return fd(t.date);}),datasets:[{data:cD,borderColor:"#ef4444",backgroundColor:gC,borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:mkOpts()});
+    var DAYS2=["Po","Út","St","Čt","Pá","So","Ne"];var wdC=Array(7).fill(0);
+    bad.forEach(function(t){var d=new Date(t.date+"T12:00:00");var dow=d.getDay()===0?6:d.getDay()-1;wdC[dow]++;});
+    mCharts.wd=new Chart(document.getElementById("mistakesWdChart").getContext("2d"),{type:"bar",data:{labels:DAYS2,datasets:[{data:wdC,backgroundColor:"rgba(239,68,68,.7)",borderRadius:5}]},options:mkOpts()});
+  }
+  var mt2=document.getElementById("mistakes-tbody");var me2=document.getElementById("mistakes-empty");var mtt=document.getElementById("mistakes-ttl");
+  if(mtt)mtt.textContent="Obchody mimo pravidla ("+bad.length+")";
+  if(!bad.length){if(mt2)mt2.innerHTML="";if(me2)me2.style.display="block";return;}if(me2)me2.style.display="none";
+  if(mt2)mt2.innerHTML=bad.slice().reverse().map(function(t){return"<tr><td>"+fd(t.date)+"</td><td><span class='bdg "+(t.session==="London"?"blon":"bny")+"'>"+t.session+"</span></td><td class='"+(t.result>0?"pos":t.result<0?"neg":"neu")+"'>"+fm(t.result)+"</td><td>"+(t.rrr?t.rrr+"R":"-")+"</td><td style='font-size:11px;color:var(--tx3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>"+(t.thoughts||"-")+"</td></tr>";}).join("");
+}
+
+// PRINT
+function printSummary(){
+  var now=new Date();var filtered2;var label2;var isWeek=(sumMode==="week");
+  if(isWeek){
+    var dow2=now.getDay()===0?6:now.getDay()-1;var mon2=new Date(now);mon2.setDate(now.getDate()-dow2);mon2.setHours(0,0,0,0);var sun2=new Date(mon2);sun2.setDate(mon2.getDate()+6);
+    filtered2=trades.filter(function(t){var d=new Date(t.date+"T12:00:00");return d>=mon2&&d<=sun2;});
+    label2="Týden "+fd(mon2.toISOString().slice(0,10))+" — "+fd(sun2.toISOString().slice(0,10));
+  }else{
+    var y2=now.getFullYear();var m3=now.getMonth();
+    filtered2=trades.filter(function(t){var d=new Date(t.date+"T12:00:00");return d.getFullYear()===y2&&d.getMonth()===m3;});
+    label2=MNS[m3]+" "+y2;
+  }
+  var w3=filtered2.filter(function(t){return t.result>0;});
+  var l3=filtered2.filter(function(t){return t.result<0;});
+  var be3=filtered2.filter(function(t){return t.result===0;});
+  var p3=filtered2.reduce(function(s,t){return s+t.result;},0);
+  var wr6=filtered2.length?(w3.length/filtered2.length*100).toFixed(1):0;
+  var rA3=filtered2.filter(function(t){return t.rrr;});
+  var aR3=rA3.length?(rA3.reduce(function(s,t){return s+t.rrr;},0)/rA3.length).toFixed(2):"-";
+  var pOk2=filtered2.filter(function(t){return t.plan==="yes";}).length;
+  var pPct2=filtered2.length?Math.round(pOk2/filtered2.length*100):0;
+  var avgW3=w3.length?w3.reduce(function(s,t){return s+t.result;},0)/w3.length:0;
+  var avgL3=l3.length?l3.reduce(function(s,t){return s+t.result;},0)/l3.length:0;
+  var pf3=(l3.length&&Math.abs(avgL3*l3.length)>0)?(avgW3*w3.length/Math.abs(avgL3*l3.length)).toFixed(2):"∞";
+  var notes3=localStorage.getItem("sum_n_"+(sumMode==="week"?getWk():getMk()))||"";
+  var bC=p3>=0?"#059669":"#dc2626";
+
+  // Equity curve sparkline as SVG
+  var s3=filtered2.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  var run3=0;var eqD3=s3.map(function(t){run3+=t.result;return run3;});
+  var eqSvg="";
+  if(eqD3.length>1){
+    var mn3=Math.min.apply(null,eqD3);var mx3=Math.max.apply(null,eqD3);var rng3=mx3-mn3||1;
+    var W=280;var H=60;
+    var pts=eqD3.map(function(v,i){return [(i/(eqD3.length-1))*W, H-((v-mn3)/rng3)*H];});
+    var pathD=pts.map(function(p,i){return(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" ");
+    var fillD=pathD+" L"+W+","+H+" L0,"+H+" Z";
+    var lineColor=p3>=0?"#059669":"#dc2626";
+    var fillColor=p3>=0?"rgba(5,150,105,0.12)":"rgba(220,38,38,0.12)";
+    eqSvg='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;">'
+      +'<defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity="0.3"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity="0"/></linearGradient></defs>'
+      +'<path d="'+fillD+'" fill="url(#eg)"/>'
+      +'<path d="'+pathD+'" fill="none" stroke="'+lineColor+'" stroke-width="2" stroke-linejoin="round"/>'
+      +'</svg>';
+  }
+
+  // Setup performance
+  var setupRows="";var setupData=[];
+  setups.forEach(function(s){
+    var st=filtered2.filter(function(t){return t.setup===s;});
+    if(!st.length)return;
+    var sp=st.reduce(function(s2,t){return s2+t.result;},0);
+    var sw=st.filter(function(t){return t.result>0;}).length;
+    var wr=st.length?(sw/st.length*100).toFixed(0):0;
+    setupData.push({name:s,n:st.length,wr:wr,pnl:sp});
+    setupRows+="<tr><td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;'>"+s+"</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:12px;'>"+st.length+"</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:12px;color:#d97706;'>"+wr+"%</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:12px;font-weight:700;color:"+(sp>=0?"#059669":"#dc2626")+"'>"+(sp>=0?"+":"")+sp.toFixed(2)+" Kč</td></tr>";
+  });
+
+  // Session performance
+  var sesRows="";
+  ["London","New York"].forEach(function(s){
+    var st=filtered2.filter(function(t){return t.session===s;});
+    if(!st.length)return;
+    var sp=st.reduce(function(s2,t){return s2+t.result;},0);
+    var sw=st.filter(function(t){return t.result>0;}).length;
+    var wr=st.length?(sw/st.length*100).toFixed(0):0;
+    sesRows+="<tr><td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;'>"+s+"</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:12px;'>"+st.length+"</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:12px;color:#d97706;'>"+wr+"%</td>"
+      +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:12px;font-weight:700;color:"+(sp>=0?"#059669":"#dc2626")+"'>"+(sp>=0?"+":"")+sp.toFixed(2)+" Kč</td></tr>";
+  });
+
+  // Trade rows
+  var trRows=filtered2.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).map(function(t){
+    var c2=t.result>=0?"#059669":"#dc2626";
+    return "<tr><td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;white-space:nowrap;'>"+fd(t.date)+(t.time?" "+t.time:"")+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;'>"+t.direction+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;max-width:130px;overflow:hidden;'>"+t.setup+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;'>"+t.session+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700;font-size:11px;color:"+c2+"'>"+(t.result>=0?"+":"")+t.result.toFixed(2)+" $</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:11px;'>"+(t.rrr?t.rrr+"R":"-")+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:11px;'>"+(t.plan==="yes"?"✓":t.plan==="partial"?"~":"✗")+"</td>"
+      +"<td style='padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:11px;'>"+(t.discipline||"-")+"</td></tr>";
+  }).join("");
+
+  // Weekday performance (month only)
+  var wdSection="";
+  if(!isWeek){
+    var DAYS3=["Pondělí","Úterý","Středa","Čtvrtek","Pátek"];
+    var wdPnl3=Array(7).fill(0);var wdN3=Array(7).fill(0);
+    filtered2.forEach(function(t){var d=new Date(t.date+"T12:00:00");var dow=d.getDay()===0?6:d.getDay()-1;if(dow<5){wdPnl3[dow]+=t.result;wdN3[dow]++;}});
+    var wdRows=DAYS3.map(function(d,i){
+      return "<tr><td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;'>"+d+"</td>"
+        +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:12px;'>"+wdN3[i]+"</td>"
+        +"<td style='padding:5px 10px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:12px;font-weight:700;color:"+(wdPnl3[i]>=0?"#059669":"#dc2626")+"'>"+(wdN3[i]>0?(wdPnl3[i]>=0?"+":"")+wdPnl3[i].toFixed(2)+" $":"-")+"</td></tr>";
+    }).join("");
+    wdSection='<div style="margin-bottom:20px;">'
+      +'<div class="sec-title">Výkon dle dne v týdnu</div>'
+      +'<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:6px 10px;text-align:left;font-size:10px;color:#94a3b8;border-bottom:2px solid #e2e8f0;text-transform:uppercase;">Den</th><th style="padding:6px 10px;text-align:center;font-size:10px;color:#94a3b8;border-bottom:2px solid #e2e8f0;text-transform:uppercase;">Obchodů</th><th style="padding:6px 10px;text-align:right;font-size:10px;color:#94a3b8;border-bottom:2px solid #e2e8f0;text-transform:uppercase;">P&L</th></tr></thead><tbody>'+wdRows+'</tbody></table></div>';
+  }
+
+  // Discipline avg
+  var discAvg=filtered2.length?(filtered2.reduce(function(s,t){return s+(t.discipline||0);},0)/filtered2.length).toFixed(1):"-";
+  var calmAvg=filtered2.length?(filtered2.reduce(function(s,t){return s+(t.calm||0);},0)/filtered2.length).toFixed(1):"-";
+
+  var html='<!DOCTYPE html><html lang="cs"><head><meta charset="UTF-8">'
+    +'<title>TradeLog — '+label2+'</title>'
+    +'<style>'
+    +'*{margin:0;padding:0;box-sizing:border-box;}'
+    +'@page{size:A4;margin:14mm 14mm 14mm 14mm;}'
+    +'body{font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#0f172a;font-size:12px;line-height:1.5;}'
+    +'.page{max-width:100%;}'
+    +'.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:2px solid #0f172a;margin-bottom:18px;}'
+    +'.header-left h1{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:2px;}'
+    +'.header-left p{font-size:12px;color:#64748b;}'
+    +'.header-right{text-align:right;font-size:11px;color:#94a3b8;}'
+    +'.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;}'
+    +'.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}'
+    +'.kpi-label{font-size:9px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}'
+    +'.kpi-value{font-size:18px;font-weight:800;font-family:"JetBrains Mono","Courier New",monospace;line-height:1.1;}'
+    +'.kpi-sub{font-size:9px;color:#94a3b8;margin-top:2px;}'
+    +'.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}'
+    +'.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;}'
+    +'.box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;}'
+    +'.sec-title{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0;}'
+    +'table{width:100%;border-collapse:collapse;}'
+    +'th{padding:6px 8px;text-align:left;font-size:9px;color:#94a3b8;border-bottom:2px solid #e2e8f0;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}'
+    +'.pos{color:#059669;}.neg{color:#dc2626;}'
+    +'.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;}'
+    +'.tag-w{background:#dcfce7;color:#059669;}.tag-l{background:#fee2e2;color:#dc2626;}.tag-b{background:#fef3c7;color:#d97706;}'
+    +'</style></head><body><div class="page">'
+
+    // Header
+    +'<div class="header">'
+    +'<div class="header-left"><h1>TradeLog</h1><p>'+label2+'</p></div>'
+    +'<div class="header-right">Vytištěno: '+now.toLocaleDateString("cs-CZ",{day:"numeric",month:"long",year:"numeric"})+'<br><span style="font-size:16px;font-weight:800;color:'+(p3>=0?"#059669":"#dc2626")+'">'+(p3>=0?"+":"")+p3.toFixed(2)+' $</span></div>'
+    +'</div>'
+
+    // KPI row
+    +'<div class="kpi-grid">'
+    +'<div class="kpi"><div class="kpi-label">P&L</div><div class="kpi-value" style="color:'+(p3>=0?"#059669":"#dc2626")+'">'+(p3>=0?"+":"")+p3.toFixed(2)+' $</div><div class="kpi-sub">za období</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Win Rate</div><div class="kpi-value" style="color:#d97706;">'+wr6+'%</div><div class="kpi-sub">'+w3.length+'W / '+l3.length+'L / '+be3.length+'BE</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Profit Factor</div><div class="kpi-value" style="color:#2563eb;">'+pf3+'</div><div class="kpi-sub">gross win / gross loss</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Avg RRR</div><div class="kpi-value" style="color:#7c3aed;">'+aR3+'</div><div class="kpi-sub">dosažené R</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Plán dodržen</div><div class="kpi-value" style="color:'+(pPct2>=80?"#059669":pPct2>=60?"#d97706":"#dc2626")+'">'+pPct2+'%</div><div class="kpi-sub">'+pOk2+' z '+filtered2.length+' obchodů</div></div>'
+    +'</div>'
+
+    // Equity + stats row
+    +'<div class="row2">'
+    +'<div class="box"><div class="sec-title">Equity křivka</div>'+(eqSvg||'<div style="color:#94a3b8;font-size:11px;padding:20px 0;text-align:center;">Nedostatek dat</div>')+'</div>'
+    +'<div class="box"><div class="sec-title">Klíčové statistiky</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+    +'<div style="padding:6px;background:#fff;border-radius:5px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;">Avg výhra</div><div style="font-size:13px;font-weight:700;color:#059669;">+'+(avgW3>0?avgW3.toFixed(2):"0.00")+' $</div></div>'
+    +'<div style="padding:6px;background:#fff;border-radius:5px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;">Avg ztráta</div><div style="font-size:13px;font-weight:700;color:#dc2626;">'+(avgL3<0?avgL3.toFixed(2):"0.00")+' $</div></div>'
+    +'<div style="padding:6px;background:#fff;border-radius:5px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;">Avg disciplína</div><div style="font-size:13px;font-weight:700;">'+discAvg+'/5</div></div>'
+    +'<div style="padding:6px;background:#fff;border-radius:5px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;">Avg klid</div><div style="font-size:13px;font-weight:700;">'+calmAvg+'/5</div></div>'
+    +'</div></div>'
+    +'</div>'
+
+    // Setup + Session
+    +(setupRows||sesRows?'<div class="row2">'
+    +(setupRows?'<div><div class="sec-title">Výkon dle setupu</div><table><thead><tr><th>Setup</th><th style="text-align:center;">N</th><th style="text-align:center;">WR</th><th style="text-align:right;">P&L</th></tr></thead><tbody>'+setupRows+'</tbody></table></div>':'<div></div>')
+    +(sesRows?'<div><div class="sec-title">Výkon dle session</div><table><thead><tr><th>Session</th><th style="text-align:center;">N</th><th style="text-align:center;">WR</th><th style="text-align:right;">P&L</th></tr></thead><tbody>'+sesRows+'</tbody></table></div>':'<div></div>')
+    +'</div>':'')
+
+    // Weekday (month only)
+    +wdSection
+
+    // Trades table
+    +(trRows?'<div style="margin-bottom:18px;"><div class="sec-title">Obchody ('+(filtered2.length)+')</div>'
+    +'<table><thead><tr>'
+    +'<th>Datum</th><th>Směr</th><th>Setup</th><th>Session</th>'
+    +'<th style="text-align:right;">Výsledek</th><th style="text-align:center;">RRR</th>'
+    +'<th style="text-align:center;">Plán</th><th style="text-align:center;">Disc</th>'
+    +'</tr></thead><tbody>'+trRows+'</tbody></table></div>':'')
+
+    // Notes
+    +(notes3?'<div class="box" style="margin-bottom:16px;"><div class="sec-title">Poznámky k období</div><div style="font-size:12px;color:#334155;line-height:1.7;white-space:pre-line;">'+notes3+'</div></div>':'')
+
+    +'<div style="text-align:center;font-size:9px;color:#cbd5e1;border-top:1px solid #e2e8f0;padding-top:8px;">TradeLog — '+label2+' — vytištěno '+now.toLocaleDateString("cs-CZ")+'</div>'
+    +'</div></body></html>';
+
+  var w=window.open("","_blank");w.document.write(html);w.document.close();setTimeout(function(){w.print();},600);
+}
+
+// LIVE PLAN
+var LP_KEY="tj_lp_"+new Date().toISOString().slice(0,10);
+var PLAN_DB={
+  "Normal Day":{"D":{setups:[{name:"Balance - ASIA>POC",conf:"VYSOKA",desc:"Mean reversion od VAH/VAL k POC. Klasicky range den.",entry:"Odmituti VAH nebo VAL",sl:"Pres VAH/VAL (3b)",tp:"POC",rr:"1:1.5-1:2"}],warnings:["Range den - nechceme velky pohyb.","Cil je POC."],psych:"Trpelivost a presnost. Jeden cisty trade je lepsi nez tri pochybne."},"b":{setups:[{name:"Balance - ASIA>POC",conf:"VYSOKA",desc:"b-profil = odmituti nahore. Short mean reversion k POC.",entry:"Odmituti VAH",sl:"Pres VAH",tp:"POC",rr:"1:1.5"}],warnings:["Nahore odmitaji."],psych:"Respektuj profil."},"p":{setups:[{name:"Balance - ASIA>POC",conf:"VYSOKA",desc:"p-profil = odmituti dole. Long mean reversion k POC.",entry:"Odmituti VAL",sl:"Pres VAL",tp:"POC",rr:"1:1.5"}],warnings:["Dole odmitaji."],psych:"Jet s kupujicimi."},"B":{setups:[{name:"Imbalance - odraz IB",conf:"NIZKA",desc:"Nejistota. Pouze pri jasnem signalu.",entry:"Odmituti extremu distribuce",sl:"Do distribuce",tp:"POC",rr:"1:1.5"}],warnings:["VYSOKA NEJISTOTA. Zvaž 0 tradu."],psych:"0 tradu je validni volba."},"Skewed High":{setups:[{name:"Imbalance - Odraz od POC",conf:"STREDNI",desc:"POC nahore = bullish bias. Pullback k POC.",entry:"Pullback k POC",sl:"Pod POC",tp:"VAH",rr:"1:2"}],warnings:["Mirny bullish bias."],psych:"Trpelive cekej na pullback."},"Skewed Low":{setups:[{name:"Balance - ASIA>POC",conf:"VYSOKA",desc:"POC dole = bearish bias.",entry:"Odmituti VAH",sl:"Pres VAH",tp:"POC",rr:"1:1.5"}],warnings:["Mirny bearish bias."],psych:"Jeden trade, jasny target."}},
+  "Normal Variation":{"D":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"IB break and retest - klic.",entry:"Retest IB high/low po breaku",sl:"Zpet do IB (3b)",tp:"1.5x IB",rr:"1:2-1:3"}],warnings:["Vetsi pohyb nez Normal day."],psych:"Flexibilni pristup."},"b":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"b-profil + NV = rozsireni dolu.",entry:"Retest IB high, short",sl:"Pres IB high",tp:"IB low",rr:"1:2"}],warnings:["Short priorita."],psych:"Jed s profilem."},"p":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"p-profil + NV = rozsireni nahoru.",entry:"Retest IB low, long",sl:"Pod IB low",tp:"IB high",rr:"1:2"}],warnings:["Long priorita."],psych:"Jed s profilem."},"B":{setups:[{name:"Imbalance - odraz IB",conf:"NIZKA",desc:"Slozity den.",entry:"Pouze jasny signal",sl:"4b",tp:"1x distribuce",rr:"1:1.5"}],warnings:["Nejistota."],psych:"Mene je vice."},"Skewed High":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Silna bullish kombinace.",entry:"Break IB high + retest",sl:"Pod IB high",tp:"1.5x IB",rr:"1:2-1:3"}],warnings:["Silny bullish signal."],psych:"Jed ve smeru."},"Skewed Low":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Silna bearish kombinace.",entry:"Break IB low + retest",sl:"Nad IB low",tp:"1.5x IB",rr:"1:2-1:3"}],warnings:["Silny bearish signal."],psych:"Jed ve smeru."}},
+  "Neutral Day":{"D":{setups:[{name:"Balance - ASIA>POC",conf:"VYSOKA",desc:"Ideal range den. Mean reversion od extremu.",entry:"Odmituti od extremu value area",sl:"Pres extreme (3b)",tp:"POC",rr:"1:1.5"}],warnings:["NEOBCHODUJ breakout.","Cil je POC."],psych:"Trpelivost. Vstup na extremu, exit na POC."},"b":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Short mean reversion od VAH.",entry:"Odmituti VAH, short",sl:"Pres VAH",tp:"POC",rr:"1:1.5"}],warnings:["Nahore odmitaji."],psych:"Vstup na extremu, exit na POC."},"p":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Long mean reversion od VAL.",entry:"Odmituti VAL, long",sl:"Pod VAL",tp:"POC",rr:"1:1.5"}],warnings:["Dole odmitaji."],psych:"Vstup, cil POC."},"B":{setups:[{name:"Balance - ASIA>POC",conf:"NIZKA",desc:"Extrémní nejistota.",entry:"Odmituti extremu",sl:"4b",tp:"POC",rr:"1:1"}],warnings:["0 tradu je validni."],psych:"Nejlepsi trade je zadny trade."},"Skewed High":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Mirny bullish bias.",entry:"Pullback k POC",sl:"Pod POC",tp:"VAH",rr:"1:1.5"}],warnings:["Konzervativni."],psych:"Jeden trade."},"Skewed Low":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Mirny bearish bias.",entry:"Pullback k POC",sl:"Nad POC",tp:"VAL",rr:"1:1.5"}],warnings:["Konzervativni."],psych:"Jeden trade."}},
+  "Neutral Extreme":{"D":{setups:[{name:"Imbalance - odraz IB",conf:"STREDNI",desc:"BO obe strany, uzavre v extremu. Sleduj smer uzavreni ke konci.",entry:"BO jedne strany + retest",sl:"Zpet do IB (3b)",tp:"ADR target",rr:"1:2"}],warnings:["Chaos v prvni casti.","Sleduj uzavraci kvartal."],psych:"Prezij prvni cast bez ztrat."},"b":{setups:[{name:"Imbalance - odraz IB",conf:"STREDNI",desc:"Odmituti nahore. Sleduj ke konci.",entry:"Odmituti nahore + retest IB low",sl:"Nad IB high",tp:"IB low",rr:"1:2"}],warnings:["Volatile."],psych:"Trpelivost."},"p":{setups:[{name:"Imbalance - odraz IB",conf:"STREDNI",desc:"Odmituti dole.",entry:"Odmituti dole + retest IB high",sl:"Pod IB low",tp:"IB high",rr:"1:2"}],warnings:["Volatile."],psych:"Mene je vice."},"B":{setups:[{name:"Imbalance - odraz IB",conf:"NIZKA",desc:"Extrémní nejistota.",entry:"Jasny signal",sl:"4b",tp:"POC",rr:"1:1.5"}],warnings:["0 tradu."],psych:"Chran kapital."},"Skewed High":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Bullish bias ke konci.",entry:"Pullback k POC",sl:"Pod POC",tp:"VAH",rr:"1:2"}],warnings:["Cekej ke konci."],psych:"Trpelive."},"Skewed Low":{setups:[{name:"Balance - ASIA>POC",conf:"STREDNI",desc:"Bearish bias ke konci.",entry:"Pullback k POC",sl:"Nad POC",tp:"VAL",rr:"1:2"}],warnings:["Cekej ke konci."],psych:"Trpelive."}},
+  "Non-Trend Day":{"D":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT. Maly pohyb, holidays.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT.","Chran kapital."],psych:"Nejlepsi obchod je zadny obchod. Jdi zabehat."},"b":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT."],psych:"Zadny trade."},"p":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT."],psych:"Zadny trade."},"B":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT."],psych:"Zadny trade."},"Skewed High":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT."],psych:"Zadny trade."},"Skewed Low":{setups:[{name:"Mimo pravidla",conf:"NIZKA",desc:"NETRADOVAT.",entry:"-",sl:"-",tp:"-",rr:"-"}],warnings:["NETRADOVAT."],psych:"Zadny trade."}},
+  "Trend Day":{"D":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"IB breakout s prijetim. Break + retest ve smeru trendu.",entry:"Retest IB high/low po breaku",sl:"Zpet do IB (2-3b)",tp:"ADR target",rr:"1:2-1:4"}],warnings:["NEOBCHODUJ PROTI TRENDU.","Neopouštěj pozici prilis brzy."],psych:"Trend day je tvuj pritel. Jed ve smeru. Disciplina > thinking."},"b":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"b-profil + trend down = break IB low prioritni.",entry:"Break IB low + retest",sl:"Nad IB low (2-3b)",tp:"Globex low",rr:"1:2-1:3"}],warnings:["Nahore odmitaji = trend down."],psych:"Jasna bias. Jed s ni."},"p":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"p-profil + trend up = break IB high.",entry:"Break IB high + pullback",sl:"Pod IB high (2-3b)",tp:"Globex high",rr:"1:2-1:4"}],warnings:["Dole odmitaji = trend up."],psych:"Cekej na vstup, pak jed."},"B":{setups:[{name:"Imbalance - odraz IB",conf:"STREDNI",desc:"Break horni distribuce.",entry:"Break + retest",sl:"Do gapu",tp:"1.5x distribuce",rr:"1:2"}],warnings:["Falsen breakouty mozne."],psych:"Selektivni - nejcistejsi setupy."},"Skewed High":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Extremne silny bullish signal.",entry:"Break IB high + retest",sl:"Pod IB high",tp:"Denni target",rr:"1:3"}],warnings:["Neobchoduj short."],psych:"Silny den. Jed agresivne ve smeru."},"Skewed Low":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Extremne silny bearish signal.",entry:"Break IB low + retest",sl:"Nad IB low",tp:"Denni target",rr:"1:3"}],warnings:["Neobchoduj long."],psych:"Silny den. Jed agresivne ve smeru."}},
+  "Multi Distribution":{"D":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Kazda distribuce = vstupni prilezitost IN-OUT ve smeru trendu.",entry:"Odmituti hranice distribuce",sl:"Do distribuce (3b)",tp:"Dalsi distribuce",rr:"1:2-1:3"}],warnings:["NEOBCHODUJ KONTRA TRENDU.","Kazda pauza = vstup, ne reverz.","Neopouštěj prilis brzy."],psych:"Multi distribution je tvuj nejlepsi pritel. Jed ve vlnach."},"b":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"b-profil + multi down. Kazda pauza = short.",entry:"Odmituti horni casti distribuce",sl:"Pres horni hranic",tp:"Spodek distribuce",rr:"1:2-1:3"}],warnings:["Silny bearish trend.","Nebuď long hero."],psych:"Silny bearish den. Nechat profit bezet."},"p":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"p-profil + multi up. Kazda pauza = long.",entry:"Odmituti dolni casti distribuce",sl:"Pod dolni hranic",tp:"Vrchol distribuce",rr:"1:2-1:3"}],warnings:["Silny bullish trend.","Nebuď short hero."],psych:"Silny bullish den. Nechat profit bezet."},"B":{setups:[{name:"Imbalance - odraz IB",conf:"STREDNI",desc:"Break horni distribuce.",entry:"Break + retest",sl:"Do gapu",tp:"1.5x distribuce",rr:"1:2"}],warnings:["Slozitejsi."],psych:"Mene tradu."},"Skewed High":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Jeden z nejsilnejsich bullish signalu.",entry:"Break z balancing faze, long",sl:"Do faze (3b)",tp:"ADR target",rr:"1:3-1:5"}],warnings:["Neobchoduj short.","Nechat profit bezet."],psych:"Vzacny den. Jed maximalne."},"Skewed Low":{setups:[{name:"Imbalance - odraz IB",conf:"VYSOKA",desc:"Jeden z nejsilnejsich bearish signalu.",entry:"Break z balancing faze, short",sl:"Do faze (3b)",tp:"ADR target",rr:"1:3-1:5"}],warnings:["Neobchoduj long.","Nechat profit bezet."],psych:"Vzacny den. Jed maximalne."}}
+};
+
+function renderLP(){
+  document.getElementById("lp-date").textContent=new Date().toLocaleDateString("cs-CZ",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  lpState=JSON.parse(localStorage.getItem(LP_KEY)||"{}");
+  var dtMap={"Normal Day":"dc-normal","Normal Variation":"dc-normalvar","Neutral Day":"dc-neutral","Neutral Extreme":"dc-neutralext","Non-Trend Day":"dc-nontrend","Trend Day":"dc-trend","Multi Distribution":"dc-multi"};
+  var vpMap={"D":"vpc-D","b":"vpc-b","p":"vpc-p","B":"vpc-B","Skewed High":"vpc-sh","Skewed Low":"vpc-sl"};
+  if(lpState.dt){var dtEl=document.getElementById(dtMap[lpState.dt]);if(dtEl){dtEl.style.borderColor="var(--ac)";dtEl.style.background="var(--adim)";} var btn=document.getElementById("s1next");if(btn){btn.disabled=false;btn.style.opacity="1";btn.style.cursor="pointer";}}
+  if(lpState.vp){var vpEl=document.getElementById(vpMap[lpState.vp]);if(vpEl){vpEl.style.borderColor="var(--ac)";vpEl.style.background="var(--adim)";}var btn2=document.getElementById("s2next");if(btn2){btn2.disabled=false;btn2.style.opacity="1";btn2.style.cursor="pointer";}}
+  var ne=document.getElementById("lp-note");if(lpState.note&&ne)ne.value=lpState.note;
+  var fok=document.getElementById("lp-fb-ok");var fac=document.getElementById("lp-fb-actual");var fnt=document.getElementById("lp-fb-note");
+  if(fok&&lpState.fbok)fok.value=lpState.fbok;if(fac&&lpState.fbact)fac.value=lpState.fbact;if(fnt&&lpState.fbnote)fnt.value=lpState.fbnote;
+  if(lpState.dt&&lpState.vp){goStep(4);genPlan();}else if(lpState.dt){goStep(2);}else{goStep(1);}
+}
+
+function goStep(n){
+  ["lp-s1","lp-s2","lp-s3","lp-s4"].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display="none";});
+  var el=document.getElementById("lp-s"+n);if(el)el.style.display="block";
+  var pct=(n-1)/3*80;var pl=document.getElementById("prog-line");if(pl)pl.style.width=pct+"%";
+  for(var d=1;d<=4;d++){var dot=document.getElementById("sd"+d);if(!dot)continue;if(d<=n){dot.style.background="linear-gradient(135deg,var(--ac),var(--pu))";dot.style.color="#fff";dot.style.border="none";}else{dot.style.background="var(--sf3)";dot.style.color="var(--tx3)";dot.style.border="2px solid var(--bd2)";}}
+}
+
+function selDT(val){
+  lpState.dt=val;localStorage.setItem(LP_KEY,JSON.stringify(lpState));
+  var ids=["dc-normal","dc-normalvar","dc-neutral","dc-neutralext","dc-nontrend","dc-trend","dc-multi"];
+  ids.forEach(function(id){var el=document.getElementById(id);if(el){el.style.borderColor="var(--bd)";el.style.background="var(--sf)";}});
+  var map={"Normal Day":"dc-normal","Normal Variation":"dc-normalvar","Neutral Day":"dc-neutral","Neutral Extreme":"dc-neutralext","Non-Trend Day":"dc-nontrend","Trend Day":"dc-trend","Multi Distribution":"dc-multi"};
+  var sel=document.getElementById(map[val]);if(sel){sel.style.borderColor="var(--ac)";sel.style.background="var(--adim)";}
+  var btn=document.getElementById("s1next");if(btn){btn.disabled=false;btn.style.opacity="1";btn.style.cursor="pointer";}
+}
+
+function selVP(val){
+  lpState.vp=val;localStorage.setItem(LP_KEY,JSON.stringify(lpState));
+  var ids=["vpc-D","vpc-b","vpc-p","vpc-B","vpc-sh","vpc-sl"];
+  ids.forEach(function(id){var el=document.getElementById(id);if(el){el.style.borderColor="var(--bd)";el.style.background="var(--sf)";}});
+  var map={"D":"vpc-D","b":"vpc-b","p":"vpc-p","B":"vpc-B","Skewed High":"vpc-sh","Skewed Low":"vpc-sl"};
+  var sel=document.getElementById(map[val]);if(sel){sel.style.borderColor="var(--ac)";sel.style.background="var(--adim)";}
+  var btn=document.getElementById("s2next");if(btn){btn.disabled=false;btn.style.opacity="1";btn.style.cursor="pointer";}
+}
+
+function selCtx(key,val,el){
+  lpState[key]=val;localStorage.setItem(LP_KEY,JSON.stringify(lpState));
+  var grp=el.parentElement;grp.querySelectorAll("div").forEach(function(b){b.style.borderColor="var(--bd)";b.style.background="";b.style.color="";});
+  el.style.borderColor="var(--ac)";el.style.background="var(--adim)";el.style.color="var(--ac2)";
+}
+function lpSaveNote(){var ne=document.getElementById("lp-note");if(ne){lpState.note=ne.value;localStorage.setItem(LP_KEY,JSON.stringify(lpState));}}
+function resetLP(){if(!confirm("Reset?"))return;localStorage.removeItem(LP_KEY);lpState={};["dc-normal","dc-normalvar","dc-neutral","dc-neutralext","dc-nontrend","dc-trend","dc-multi","vpc-D","vpc-b","vpc-p","vpc-B","vpc-sh","vpc-sl"].forEach(function(id){var el=document.getElementById(id);if(el){el.style.borderColor="var(--bd)";el.style.background="var(--sf)";}});goStep(1);}
+function lpSaveFB(){
+  var fok=document.getElementById("lp-fb-ok");var fac=document.getElementById("lp-fb-actual");var fnt=document.getElementById("lp-fb-note");
+  if(fok)lpState.fbok=fok.value;if(fac)lpState.fbact=fac.value;if(fnt)lpState.fbnote=fnt.value;
+  localStorage.setItem(LP_KEY,JSON.stringify(lpState));
+}
+
+function genPlan(){
+  var dt=lpState.dt;var vp=lpState.vp;if(!dt||!vp)return;
+  var badges=document.getElementById("lp-badges");
+  if(badges){var bi=[{l:dt,c:"var(--ac)"},{l:"VP: "+vp,c:"var(--pu)"}];if(lpState.ot)bi.push({l:lpState.ot,c:"var(--cy)"});if(lpState.trend)bi.push({l:lpState.trend,c:lpState.trend==="bullish"?"var(--gr)":lpState.trend==="bearish"?"var(--rd)":"var(--yw)"});badges.innerHTML=bi.map(function(b){return'<span style="background:rgba(0,0,0,.3);border:1px solid '+b.c+';color:'+b.c+';padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--mo);">'+b.l+'</span>';}).join("");}
+  var plan=PLAN_DB[dt]?PLAN_DB[dt][vp]:null;
+  var confC={"VYSOKA":"var(--gr)","STREDNI":"var(--yw)","NIZKA":"var(--rd)"};
+  var se=document.getElementById("lp-setups");
+  if(se&&plan){se.innerHTML=plan.setups.map(function(s){var cc=confC[s.conf]||"var(--tx3)";return'<div style="background:var(--sf2);border:1px solid var(--bd2);border-radius:10px;padding:14px;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="font-size:13px;font-weight:700;">'+s.name+'</span><span style="font-size:10px;padding:2px 8px;border-radius:4px;color:'+cc+';border:1px solid '+cc+';">'+s.conf+'</span></div><div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">'+s.desc+'</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"><div style="background:var(--sf3);border-radius:7px;padding:8px;"><div style="font-size:9px;color:var(--tx3);">ENTRY</div><div style="font-size:11px;font-weight:600;font-family:var(--mo);">'+s.entry+'</div></div><div style="background:var(--sf3);border-radius:7px;padding:8px;"><div style="font-size:9px;color:var(--tx3);">SL</div><div style="font-size:11px;font-weight:600;font-family:var(--mo);color:var(--rd);">'+s.sl+'</div></div><div style="background:var(--sf3);border-radius:7px;padding:8px;"><div style="font-size:9px;color:var(--tx3);">TP</div><div style="font-size:11px;font-weight:600;font-family:var(--mo);color:var(--gr);">'+s.tp+'</div></div><div style="background:var(--sf3);border-radius:7px;padding:8px;"><div style="font-size:9px;color:var(--tx3);">R:R</div><div style="font-size:11px;font-weight:600;font-family:var(--mo);color:var(--ac2);">'+s.rr+'</div></div></div></div>';}).join("");}
+  var we=document.getElementById("lp-warnings");
+  if(we&&plan){var w2=plan.warnings.slice();if(lpState.ot==="OD")w2.unshift("Open Drive - silny directionalni signal!");if(lpState.ib==="narrow")w2.push("Uzky IB - mozny breakout.");we.innerHTML=w2.map(function(w){return'<div style="display:flex;gap:10px;margin-bottom:6px;"><span style="color:var(--yw);">▸</span><span style="font-size:13px;color:var(--tx2);">'+w+'</span></div>';}).join("");}
+  var pe=document.getElementById("lp-psych");if(pe&&plan)pe.innerHTML=plan.psych;
+  var ce=document.getElementById("lp-checklist");
+  if(ce){var checks=["Mám identifikovaný typ dne a profil?","Znám klíčové úrovně (VAH, POC, VAL, IB)?","Je setup v souladu s doporučením?","Mám jasný entry, SL a TP?","R:R alespoň 1:1.5?","Dodržuji směr trendu?","Mám nastaven denní loss limit?","Jsem psychicky v pořádku?"];ce.innerHTML=checks.map(function(ch){return'<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0;"><input type="checkbox" style="accent-color:var(--ac);width:15px;height:15px;"><span style="font-size:13px;color:var(--tx2);">'+ch+'</span></label>';}).join("");}
+}
+
+function setAccTarget(id, val) {
+  var a = accounts.find(function(x){ return x.id === id; });
+  if (a) { a.target = parseFloat(val) || 3000; saveAccounts(); }
+  if (id === activeAcc) renderDash();
+}
+
+// STATS
+var statsCharts = {};
+function renderStats() {
+  var el = document.getElementById("stats-metrics");
+  if (!trades.length) {
+    if (el) el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="eic">🔬</div><p>Přidej obchody pro statistiky</p></div>';
+    return;
+  }
+
+  var DAY_TYPES = ["Normal Day","Normal Variation","Neutral Day","Neutral Extreme","Non-Trend Day","Trend Day","Multi Distribution"];
+  var OPEN_TYPES = ["OAIR","OAOR","Open Drive","Open Rejection Reverse"];
+  var PHASES = ["IB","Post-IB","Afternoon"];
+  var MISTAKE_LABELS = {none:"Žádná",skipped:"Přeskočen setup",early_exit:"Předčasný výstup",oversized:"Převelká pozice",revenge:"Revenge trade",no_plan:"Bez plánu",fomo:"FOMO vstup"};
+
+  var tagged = trades.filter(function(t){ return t.dayType; });
+  var execT = trades.filter(function(t){ return t.execQuality; });
+  var mistakeT = trades.filter(function(t){ return t.mistakeType && t.mistakeType !== "none"; });
+
+  if (el) el.innerHTML =
+    mcCard("Tagováno", tagged.length+"/"+trades.length, Math.round(tagged.length/trades.length*100)+"% obchodů", "var(--ac2)", "linear-gradient(90deg,var(--ac),transparent)") +
+    mcCard("Avg Execution", execT.length ? (execT.reduce(function(s,t){return s+t.execQuality;},0)/execT.length).toFixed(1)+"/5" : "-", "", "var(--cy)", "linear-gradient(90deg,var(--cy),transparent)") +
+    mcCard("Chyby", mistakeT.length, "celkem zaznamenaných", "var(--rd)", "linear-gradient(90deg,var(--rd),transparent)") +
+    mcCard("Top typ dne", (function(){
+      var best = null; var bestWr = -1;
+      DAY_TYPES.forEach(function(dt){ var ts = trades.filter(function(t){return t.dayType===dt;}); if(ts.length>=2){ var wr=ts.filter(function(t){return t.result>0;}).length/ts.length; if(wr>bestWr){bestWr=wr;best=dt;}} });
+      return best ? best.replace(" Day","").replace(" Distribution","") : "—";
+    })(), "nejlepší WR", "var(--gr)", "linear-gradient(90deg,var(--gr),transparent)");
+
+  // HEATMAPA: Typ dne × Setup
+  var usedDTs = DAY_TYPES.filter(function(dt){ return trades.some(function(t){return t.dayType===dt;}); });
+  var usedSetups = setups.filter(function(s){ return trades.some(function(t){return t.setup===s;}); });
+  var hmEl = document.getElementById("stats-heatmap");
+  if (hmEl && usedDTs.length && usedSetups.length) {
+    var rows = '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+    rows += '<thead><tr><th style="padding:6px 10px;text-align:left;color:var(--tx3);font-size:10px;border-bottom:1px solid var(--bd);background:var(--sf2);">Typ dne \\ Setup</th>';
+    usedSetups.forEach(function(s){ rows += '<th style="padding:6px 8px;text-align:center;color:var(--tx3);font-size:10px;border-bottom:1px solid var(--bd);background:var(--sf2);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(s.length>14?s.slice(0,14)+"…":s)+'</th>'; });
+    rows += '</tr></thead><tbody>';
+    usedDTs.forEach(function(dt){
+      var dtTs = trades.filter(function(t){return t.dayType===dt;});
+      rows += '<tr><td style="padding:7px 10px;font-size:11px;font-weight:600;border-bottom:1px solid var(--bd);white-space:nowrap;">'+dt+'<br><span style="font-size:9px;font-weight:400;color:var(--tx3);">n='+dtTs.length+'</span></td>';
+      usedSetups.forEach(function(s){
+        var cell = dtTs.filter(function(t){return t.setup===s;});
+        if (!cell.length) { rows += '<td style="padding:7px 8px;text-align:center;border-bottom:1px solid var(--bd);color:var(--tx3);font-size:10px;">—</td>'; return; }
+        var wr = cell.filter(function(t){return t.result>0;}).length/cell.length;
+        var pnl = cell.reduce(function(s2,t){return s2+t.result;},0);
+        var bg = wr>=0.6?"rgba(16,185,129,0.2)":wr>=0.4?"rgba(245,158,11,0.15)":"rgba(239,68,68,0.15)";
+        var col = wr>=0.6?"var(--gr)":wr>=0.4?"var(--yw)":"var(--rd)";
+        rows += '<td style="padding:7px 8px;text-align:center;border-bottom:1px solid var(--bd);background:'+bg+';"><div style="font-size:12px;font-weight:800;color:'+col+';font-family:var(--mo);">'+Math.round(wr*100)+'%</div><div style="font-size:9px;color:var(--tx3);">n='+cell.length+'</div><div style="font-size:9px;color:'+(pnl>=0?"var(--gr)":"var(--rd)")+';">'+(pnl>=0?"+":"")+pnl.toFixed(0)+'$</div></td>';
+      });
+      rows += '</tr>';
+    });
+    rows += '</tbody></table>';
+    hmEl.innerHTML = rows;
+  } else if (hmEl) {
+    hmEl.innerHTML = '<div style="color:var(--tx3);font-size:12px;padding:12px;">Začni tagovat "Typ dne" a "Setup" při zadávání obchodů.</div>';
+  }
+
+  // Typ dne tabulka
+  function renderTypeTable(types, field, el2) {
+    if (!el2) return;
+    var rows2 = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="font-size:10px;color:var(--tx3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);">Typ</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">N</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">WR</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">Avg R</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:right;border-bottom:1px solid var(--bd);">P&L</th></tr></thead><tbody>';
+    var hasData = false;
+    types.forEach(function(typ){
+      var ts = trades.filter(function(t){return t[field]===typ;});
+      if (!ts.length) return;
+      hasData = true;
+      var wr2 = (ts.filter(function(t){return t.result>0;}).length/ts.length*100).toFixed(0);
+      var pnl2 = ts.reduce(function(s,t){return s+t.result;},0);
+      var rArr2 = ts.filter(function(t){return t.rrr;}); var avgR2 = rArr2.length?(rArr2.reduce(function(s,t){return s+t.rrr;},0)/rArr2.length).toFixed(1):"-";
+      var wrc = +wr2>=60?"var(--gr)":+wr2>=40?"var(--yw)":"var(--rd)";
+      rows2 += '<tr><td style="padding:7px 10px;font-size:11px;border-bottom:1px solid var(--bd);">'+typ+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+ts.length+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;font-weight:700;color:'+wrc+';border-bottom:1px solid var(--bd);">'+wr2+'%</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+avgR2+'</td><td style="padding:7px 10px;font-size:12px;font-family:var(--mo);text-align:right;font-weight:700;color:'+(pnl2>=0?"var(--gr)":"var(--rd)")+';border-bottom:1px solid var(--bd);">'+(pnl2>=0?"+":"")+pnl2.toFixed(0)+'$</td></tr>';
+    });
+    if (!hasData) rows2 += '<tr><td colspan="5" style="padding:12px;color:var(--tx3);font-size:12px;text-align:center;">Žádná data — taguj obchody</td></tr>';
+    rows2 += '</tbody></table>';
+    el2.innerHTML = rows2;
+  }
+  renderTypeTable(DAY_TYPES, "dayType", document.getElementById("stats-daytype"));
+  renderTypeTable(OPEN_TYPES, "openType", document.getElementById("stats-opentype"));
+  renderTypeTable(PHASES, "phase", document.getElementById("stats-phase"));
+
+  // Setup A: kvalita retestu
+  function renderSimpleGroup(groups, el) {
+    if (!el) return;
+    var rows = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="font-size:10px;color:var(--tx3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);">Skupina</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">N</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">WR</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:right;border-bottom:1px solid var(--bd);">P&L</th></tr></thead><tbody>';
+    var has = false;
+    groups.forEach(function(g) {
+      if (!g.ts.length) return;
+      has = true;
+      var wr = (g.ts.filter(function(t){return t.result>0;}).length / g.ts.length * 100).toFixed(0);
+      var pnl = g.ts.reduce(function(s,t){return s+t.result;},0);
+      var wrc = +wr>=60?"var(--gr)":+wr>=40?"var(--yw)":"var(--rd)";
+      rows += '<tr><td style="padding:7px 10px;font-size:11px;border-bottom:1px solid var(--bd);">'+g.label+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+g.ts.length+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;font-weight:700;color:'+wrc+';border-bottom:1px solid var(--bd);">'+wr+'%</td><td style="padding:7px 10px;font-size:12px;font-family:var(--mo);text-align:right;font-weight:700;color:'+(pnl>=0?"var(--gr)":"var(--rd)")+';border-bottom:1px solid var(--bd);">'+(pnl>=0?"+":"")+pnl.toFixed(0)+'$</td></tr>';
+    });
+    if (!has) rows += '<tr><td colspan="4" style="padding:12px;color:var(--tx3);font-size:12px;text-align:center;">Žádná data — vyplňuj Setup A pole u obchodů</td></tr>';
+    rows += '</tbody></table>';
+    el.innerHTML = rows;
+  }
+  renderSimpleGroup([
+    { label: "Kvalitní retest", ts: trades.filter(function(t){return t.retestQuality==="quality";}) },
+    { label: "Střední retest", ts: trades.filter(function(t){return t.retestQuality==="medium";}) },
+    { label: "Nekvalitní retest", ts: trades.filter(function(t){return t.retestQuality==="poor";}) }
+  ], document.getElementById("stats-retest"));
+  renderSimpleGroup([
+    { label: "T2 mechanicky (trail)", ts: trades.filter(function(t){return t.exitT2==="mechanic";}) },
+    { label: "T2 ručně (zavřel jsem brzy)", ts: trades.filter(function(t){return t.exitT2==="manual";}) }
+  ], document.getElementById("stats-exit"));
+  renderSimpleGroup([
+    { label: "Úzká IB (<25% ADR)", ts: trades.filter(function(t){return t.ibAdrRatio!==null && t.ibAdrRatio<25;}) },
+    { label: "Střední IB (25–40% ADR)", ts: trades.filter(function(t){return t.ibAdrRatio!==null && t.ibAdrRatio>=25 && t.ibAdrRatio<=40;}) },
+    { label: "Široká IB (>40% ADR)", ts: trades.filter(function(t){return t.ibAdrRatio!==null && t.ibAdrRatio>40;}) }
+  ], document.getElementById("stats-ibadr"));
+
+  // Execution Quality chart
+  if (statsCharts.exec) { statsCharts.exec.destroy(); }
+  if (statsCharts.execPnl) { statsCharts.execPnl.destroy(); }
+  var execData = [1,2,3,4,5].map(function(q){
+    var ts = trades.filter(function(t){return t.execQuality===q;});
+    return { q:q, n:ts.length, wr:ts.length?ts.filter(function(t){return t.result>0;}).length/ts.length*100:null, pnl:ts.reduce(function(s,t){return s+t.result;},0) };
+  });
+  var ecEl = document.getElementById("stats-execChart");
+  if (ecEl) {
+    statsCharts.exec = new Chart(ecEl.getContext("2d"), {
+      type:"bar",
+      data:{labels:["1★","2★","3★","4★","5★"],datasets:[{label:"Win Rate %",data:execData.map(function(d){return d.wr;}),backgroundColor:execData.map(function(d){return d.wr===null?"rgba(100,116,139,.3)":d.wr>=60?"rgba(16,185,129,.75)":d.wr>=40?"rgba(245,158,11,.75)":"rgba(239,68,68,.75)";}),borderRadius:5}]},
+      options:mkLegOpts()
+    });
+  }
+  var epEl = document.getElementById("stats-execPnlChart");
+  if (epEl) {
+    statsCharts.execPnl = new Chart(epEl.getContext("2d"), {
+      type:"bar",
+      data:{labels:["1★","2★","3★","4★","5★"],datasets:[{label:"P&L ($)",data:execData.map(function(d){return d.pnl;}),backgroundColor:execData.map(function(d){return d.pnl>=0?"rgba(16,185,129,.75)":"rgba(239,68,68,.75)";}),borderRadius:5}]},
+      options:mkLegOpts()
+    });
+  }
+
+  // Chyby tabulka
+  var mistakeEl = document.getElementById("stats-mistakes");
+  if (mistakeEl) {
+    var mKeys = Object.keys(MISTAKE_LABELS).filter(function(k){return k!=="none";});
+    var mRows = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="font-size:10px;color:var(--tx3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);">Chyba</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">N</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:right;border-bottom:1px solid var(--bd);">Ztráta</th></tr></thead><tbody>';
+    var hasMistakes = false;
+    mKeys.forEach(function(k){
+      var ts = trades.filter(function(t){return t.mistakeType===k;});
+      if (!ts.length) return;
+      hasMistakes = true;
+      var pnl3 = ts.reduce(function(s,t){return s+t.result;},0);
+      mRows += '<tr><td style="padding:7px 10px;font-size:11px;border-bottom:1px solid var(--bd);">'+MISTAKE_LABELS[k]+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+ts.length+'</td><td style="padding:7px 10px;font-size:12px;font-family:var(--mo);text-align:right;font-weight:700;color:'+(pnl3>=0?"var(--gr)":"var(--rd)")+';border-bottom:1px solid var(--bd);">'+(pnl3>=0?"+":"")+pnl3.toFixed(0)+'$</td></tr>';
+    });
+    if (!hasMistakes) mRows += '<tr><td colspan="3" style="padding:12px;color:var(--gr);font-size:12px;text-align:center;">✅ Žádné zaznamenané chyby</td></tr>';
+    mRows += '</tbody></table>';
+    mistakeEl.innerHTML = mRows;
+  }
+
+  // Top kombinace (dayType + setup, min 3 trade)
+  var comboEl = document.getElementById("stats-combos");
+  if (comboEl && usedDTs.length) {
+    var combos = [];
+    usedDTs.forEach(function(dt){
+      usedSetups.forEach(function(s){
+        var ts = trades.filter(function(t){return t.dayType===dt && t.setup===s;});
+        if (ts.length < 3) return;
+        var wr3 = ts.filter(function(t){return t.result>0;}).length/ts.length;
+        var pnl4 = ts.reduce(function(acc,t){return acc+t.result;},0);
+        var rArr3 = ts.filter(function(t){return t.rrr;}); var avgR3 = rArr3.length?(rArr3.reduce(function(acc,t){return acc+t.rrr;},0)/rArr3.length).toFixed(1):"-";
+        combos.push({dt:dt, setup:s, n:ts.length, wr:wr3, pnl:pnl4, avgR:avgR3});
+      });
+    });
+    combos.sort(function(a,b){ return (b.wr*b.n) - (a.wr*a.n); });
+    if (!combos.length) {
+      comboEl.innerHTML = '<div style="color:var(--tx3);font-size:12px;padding:12px;">Zatím nemáš žádnou kombinaci s min. 3 trade. Taguj obchody!</div>';
+    } else {
+      var cRows = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="font-size:10px;color:var(--tx3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);">Typ dne</th><th style="font-size:10px;color:var(--tx3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);">Setup</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">N</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">WR</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:center;border-bottom:1px solid var(--bd);">Avg R</th><th style="font-size:10px;color:var(--tx3);padding:6px;text-align:right;border-bottom:1px solid var(--bd);">P&L</th></tr></thead><tbody>';
+      combos.forEach(function(c){
+        var wrc2 = c.wr>=0.6?"var(--gr)":c.wr>=0.4?"var(--yw)":"var(--rd)";
+        cRows += '<tr><td style="padding:7px 10px;font-size:11px;border-bottom:1px solid var(--bd);">'+c.dt+'</td><td style="padding:7px 10px;font-size:11px;border-bottom:1px solid var(--bd);">'+c.setup+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+c.n+'</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;font-weight:700;color:'+wrc2+';border-bottom:1px solid var(--bd);">'+Math.round(c.wr*100)+'%</td><td style="padding:7px 6px;font-size:12px;font-family:var(--mo);text-align:center;border-bottom:1px solid var(--bd);">'+c.avgR+'</td><td style="padding:7px 10px;font-size:12px;font-family:var(--mo);text-align:right;font-weight:700;color:'+(c.pnl>=0?"var(--gr)":"var(--rd)")+';border-bottom:1px solid var(--bd);">'+(c.pnl>=0?"+":"")+c.pnl.toFixed(0)+'$</td></tr>';
+      });
+      cRows += '</tbody></table>';
+      comboEl.innerHTML = cRows;
+    }
+  } else if (comboEl) {
+    comboEl.innerHTML = '<div style="color:var(--tx3);font-size:12px;padding:12px;">Taguj obchody pro analýzu kombinací.</div>';
+  }
+}
+
+// INIT
+loadData();
+playbooks.forEach(function(pb){if(setups.indexOf(pb.name)<0)setups.push(pb.name);});
+updateAccSel();
+updateSetupSels();
+renderDash();
+renderTrades();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("sw.js").catch(function(e){ console.log("SW registration failed", e); });
+  });
+}
+
+</script>
+</body>
+</html>
